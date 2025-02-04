@@ -4,6 +4,7 @@
     "activities": [
       "Best Execution Validation",
       "CSA Verification",
+      "Client Limit Validation",
       "Exercise Decision",
       "Final Settlement",
       "ISDA Master Agreement Check",
@@ -36,6 +37,7 @@
       "risk_score",
       "strike_price",
       "theta",
+      "trade_id",
       "trading_strategy",
       "vega"
     ],
@@ -53,13 +55,16 @@
       "CSA Verification",
       "Client Limit Validation",
       "Credit Check",
+      "Exercise Decision",
       "ISDA Master Agreement Check",
-      "Initial Margin Calculation",
       "Premium Calculation",
       "Quote Provided",
       "Quote Requested",
+      "Regulatory Reporting Generation",
       "Settlement Instructions",
-      "Strategy Validation"
+      "Strategy Validation",
+      "Trade Allocation",
+      "Transaction Reporting Check"
     ],
     "attributes": [
       "booking_system",
@@ -68,6 +73,7 @@
       "currency_pair",
       "notional_amount",
       "option_type",
+      "order_id",
       "premium",
       "strike_price",
       "trading_strategy"
@@ -95,6 +101,7 @@
       "gamma",
       "limit_usage",
       "option_type",
+      "position_id",
       "risk_score",
       "theta",
       "vega"
@@ -123,7 +130,11 @@
       "currency_pair",
       "delta",
       "gamma",
+      "market_data_id",
+      "notional_amount",
       "option_type",
+      "premium",
+      "strike_price",
       "theta",
       "trading_strategy",
       "vega"
@@ -150,7 +161,10 @@
     "attributes": [
       "booking_system",
       "case_id",
+      "client_id",
       "client_type",
+      "compliance_status",
+      "credit_limit",
       "trading_strategy"
     ],
     "relationships": [

@@ -1,0 +1,256 @@
+{
+  "Trade": {
+    "total_duration_hours": 24,
+    "default_gap_hours": 1,
+    "activity_thresholds": {
+      "Best Execution Validation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.5
+      },
+      "CSA Verification": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Client Limit Validation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.5
+      },
+      "Exercise Decision": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 1
+      },
+      "Final Settlement": {
+        "max_duration_hours": 6,
+        "max_gap_after_hours": 2
+      },
+      "ISDA Master Agreement Check": {
+        "max_duration_hours": 4,
+        "max_gap_after_hours": 2
+      },
+      "KYC Refresh Check": {
+        "max_duration_hours": 3,
+        "max_gap_after_hours": 1
+      },
+      "Premium Settlement": {
+        "max_duration_hours": 4,
+        "max_gap_after_hours": 2
+      },
+      "Regulatory Reporting Generation": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Risk Assessment": {
+        "max_duration_hours": 3,
+        "max_gap_after_hours": 1
+      },
+      "Settlement Instructions": {
+        "max_duration_hours": 5,
+        "max_gap_after_hours": 2
+      },
+      "Trade Allocation": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Trade Confirmation": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Trade Execution": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Trade Initiated": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Trade Matching": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.5
+      },
+      "Trade Reconciliation": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Trade Transparency Assessment": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Trade Validation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.5
+      },
+      "Transaction Reporting Check": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      }
+    }
+  },
+  "Order": {
+    "total_duration_hours": 12,
+    "default_gap_hours": 0.5,
+    "activity_thresholds": {
+      "Best Execution Validation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      },
+      "CSA Verification": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Client Limit Validation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      },
+      "Credit Check": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Exercise Decision": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "ISDA Master Agreement Check": {
+        "max_duration_hours": 3,
+        "max_gap_after_hours": 1
+      },
+      "Premium Calculation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      },
+      "Quote Provided": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Quote Requested": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Regulatory Reporting Generation": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Settlement Instructions": {
+        "max_duration_hours": 4,
+        "max_gap_after_hours": 2
+      },
+      "Strategy Validation": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Trade Allocation": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Transaction Reporting Check": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      }
+    }
+  },
+  "Position": {
+    "total_duration_hours": 8,
+    "default_gap_hours": 1,
+    "activity_thresholds": {
+      "CSA Verification": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Collateral Management": {
+        "max_duration_hours": 4,
+        "max_gap_after_hours": 2
+      },
+      "Initial Margin Calculation": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Position Reconciliation": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Risk Assessment": {
+        "max_duration_hours": 3,
+        "max_gap_after_hours": 1
+      },
+      "Risk Transfer Executed": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      }
+    }
+  },
+  "MarketData": {
+    "total_duration_hours": 2,
+    "default_gap_hours": 0.25,
+    "activity_thresholds": {
+      "Greeks Calculation": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Market Data Validation": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Market Making Spread Calculation": {
+        "max_duration_hours": 0.25,
+        "max_gap_after_hours": 0.25
+      },
+      "Skew Calibration": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      },
+      "Surface Construction": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      },
+      "Volatility Smile Analysis": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      },
+      "Volatility Surface Analysis": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.25
+      }
+    }
+  },
+  "Client": {
+    "total_duration_hours": 12,
+    "default_gap_hours": 1,
+    "activity_thresholds": {
+      "CSA Verification": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Client Limit Validation": {
+        "max_duration_hours": 0.5,
+        "max_gap_after_hours": 0.5
+      },
+      "Credit Check": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "ISDA Master Agreement Check": {
+        "max_duration_hours": 3,
+        "max_gap_after_hours": 1
+      },
+      "KYC Refresh Check": {
+        "max_duration_hours": 3,
+        "max_gap_after_hours": 1
+      },
+      "Regulatory Reporting Generation": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      },
+      "Settlement Instructions": {
+        "max_duration_hours": 4,
+        "max_gap_after_hours": 2
+      },
+      "Trade Transparency Assessment": {
+        "max_duration_hours": 1,
+        "max_gap_after_hours": 0.5
+      },
+      "Transaction Reporting Check": {
+        "max_duration_hours": 2,
+        "max_gap_after_hours": 1
+      }
+    }
+  }
+}
