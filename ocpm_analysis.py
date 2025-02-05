@@ -274,7 +274,7 @@ class OCPMAnalyzer:
 
             # Initialize OpenAI client
             client = AzureOpenAI(
-                api_key="5GLXXNjNjhjRKunOEVm8v7HIk335V4E9myCFNdFvpUmuezUG3hzbJQQJ99BAACYeBjFXJ3w3AAABACOGBfoy",
+                api_key="FJkIzOgZjYzy5iDUxJLxRH3ozuk0xIiIjfa97srlBSKJfZmkfJFbJQQJ99BBACYeBjFXJ3w3AAABACOGn0Yq",
                 api_version="2024-02-01",
                 azure_endpoint="https://smartcall.openai.azure.com/"
             )
