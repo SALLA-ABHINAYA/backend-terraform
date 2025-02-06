@@ -122,8 +122,6 @@ class UnfairOCELAnalyzer:
             # Process data efficiently
             self._process_data()
 
-            # self._process_outliers() #Note : _process_outliers is already getting called in _process_data above
-
             logger.info("UnfairOCELAnalyzer initialization completed successfully")
 
         except Exception as e:
@@ -627,7 +625,40 @@ class UnfairOCELAnalyzer:
             return {}
 
     def _detect_case_outliers(self) -> Dict[str, OutlierMetrics]:
-        """Optimized case complexity outlier detection"""
+        """Analyzes case complexity outliers using multivariate metrics and z-scores.
+
+            Process:
+            1. Converts OCEL events into a DataFrame with key case metrics:
+               - Total events per case
+               - Unique activities per case
+               - Resource variety per case
+               - Case duration in hours
+               - Object type variety
+
+            2. Calculates z-scores for all metrics simultaneously using vectorized operations
+               for performance optimization.
+
+            3. Creates composite z-score by averaging absolute z-scores across all metrics
+               to identify overall case complexity outliers.
+
+            4. For each case, captures:
+               - Core metrics (events, activities, resources, duration)
+               - Complete event sequence with activity and resource patterns
+               - Temporal information (start, end, duration)
+               - Specific outlier patterns (high complexity, high variety, long duration)
+               - Full event traceability for detailed investigation
+
+            Outlier Definition:
+            - Cases with composite z-score > 3 are flagged as outliers
+            - Individual metrics contributing to outlier status are tracked
+            - Both unusually complex and unusually simple cases can be identified
+
+            Returns:
+                Dict[str, OutlierMetrics]: Dictionary mapping case IDs to OutlierMetrics objects containing:
+                    - z_score: Composite z-score for the case
+                    - is_outlier: Boolean indicating if case is an outlier (z-score > 3)
+                    - details: Dict with complete metrics, events, temporal data and outlier patterns
+            """
         try:
             # Pre-process events into a DataFrame for faster analysis
             events_df = pd.DataFrame([{
@@ -805,26 +836,26 @@ class UnfairOCELAnalyzer:
                         case_id = violation['case_id']
                         obj_type = violation['object_type']
 
-                        # Get case specific events for this object type
-                        case_events = case_data[case_data['object_types'].apply(lambda x: obj_type in x)]
+                        # Filter events for specific case and object type
+                        case_events = case_data[
+                            (case_data['event_id'].str.startswith(f"{case_id}_")) &
+                            (case_data['object_types'].apply(lambda x: obj_type in x))
+                            ]
 
-                        failures['incomplete_cases'].append({
-                            'case_id': case_id,
-                            'object_type': obj_type,
-                            'missing_activities': violation['missing_activities'],
-                            'completed_activities': case_events['activity'].tolist(),
-                            'events': case_events['event_id'].tolist(),
-                            'last_event': {
-                                'event_id': case_events.iloc[-1][
-                                    'event_id'] if not case_events.empty else None,
-                                'activity': case_events.iloc[-1][
-                                    'activity'] if not case_events.empty else None,
-                                'timestamp': case_events.iloc[-1][
-                                    'timestamp'] if not case_events.empty else None,
-                                'resource': case_events.iloc[-1][
-                                    'resource'] if not case_events.empty else None
-                            }
-                        })
+                        if not case_events.empty:
+                            failures['incomplete_cases'].append({
+                                'case_id': case_id,
+                                'object_type': obj_type,
+                                'missing_activities': violation['missing_activities'],
+                                'completed_activities': case_events['activity'].tolist(),
+                                'events': case_events['event_id'].tolist(),
+                                'last_event': {
+                                    'event_id': case_events.iloc[-1]['event_id'],
+                                    'activity': case_events.iloc[-1]['activity'],
+                                    'timestamp': case_events.iloc[-1]['timestamp'],
+                                    'resource': case_events.iloc[-1]['resource']
+                                }
+                            })
 
                 # Track timing violations
                 for obj_type, timing_rules in timing_thresholds.items():
@@ -960,151 +991,6 @@ class UnfairOCELAnalyzer:
             logger.error(f"Error in failure pattern detection: {str(e)}")
             logger.error(traceback.format_exc())
             return {}
-
-    def create_failure_pattern_visualization(self, failures: Dict) -> go.Figure:
-        """Create enhanced visualization for all failure patterns"""
-        # Count occurrences of each failure type
-        failure_counts = {
-            'Sequence Violations': len(failures.get('sequence_violations', [])),
-            'Incomplete Cases': len(failures.get('incomplete_cases', [])),
-            'Long Running Cases': len(failures.get('long_running', [])),
-            'Resource Switches': len(failures.get('resource_switches', [])),
-            'Rework Activities': len(failures.get('rework_activities', []))
-        }
-
-        # Create bar chart
-        fig = go.Figure(data=[
-            go.Bar(
-                x=list(failure_counts.keys()),
-                y=list(failure_counts.values()),
-                text=list(failure_counts.values()),
-                textposition='auto',
-            )
-        ])
-
-        fig.update_layout(
-            title='Process Failure Patterns Distribution',
-            xaxis_title='Failure Pattern Type',
-            yaxis_title='Count',
-            showlegend=False,
-            height=400,
-            template='plotly_dark'
-        )
-
-        return fig
-
-    def create_outlier_visualizations(self) -> Dict[str, go.Figure]:
-        """Create visualizations for outlier analysis"""
-        figs = {}
-
-        try:
-            # Resource workload outliers
-            if self.outliers.get('resource_load'):
-                resource_data = []
-                for resource, metrics in self.outliers['resource_load'].items():
-                    resource_data.append({
-                        'Resource': resource,
-                        'Workload': metrics.details['workload'],
-                        'Z-Score': metrics.z_score,
-                        'Is Outlier': metrics.is_outlier
-                    })
-
-                if resource_data:
-                    figs['resource_outliers'] = px.scatter(
-                        resource_data,
-                        x='Resource',
-                        y='Workload',
-                        size='Z-Score',
-                        color='Is Outlier',
-                        title='Resource Workload Distribution'
-                    )
-
-            # Duration outliers
-            if self.outliers.get('duration'):
-                duration_data = []
-                for activity, metrics in self.outliers['duration'].items():
-                    duration_data.append({
-                        'Activity': activity,
-                        'Z-Score': metrics.z_score,
-                        'Is Outlier': metrics.is_outlier
-                    })
-
-                if duration_data:
-                    figs['duration_outliers'] = px.scatter(
-                        duration_data,
-                        x='Activity',
-                        y='Z-Score',
-                        color='Is Outlier',
-                        title='Activity Duration Outliers'
-                    )
-
-            # Case complexity outliers
-            if self.outliers.get('case_complexity'):
-                case_data = []
-                for metric, metrics in self.outliers['case_complexity'].items():
-                    if metrics.details.get('outlier_cases'):
-                        case_data.append({
-                            'Metric': metric,
-                            'Z-Score': metrics.z_score,
-                            'Outlier Count': len(metrics.details['outlier_cases'])
-                        })
-
-                if case_data:
-                    figs['case_outliers'] = px.bar(
-                        case_data,
-                        x='Metric',
-                        y='Outlier Count',
-                        color='Z-Score',
-                        title='Case Complexity Outliers'
-                    )
-
-            # Failure patterns
-            if self.outliers.get('failures'):
-                failure_data = [
-                    {'Pattern': 'Incomplete Cases',
-                     'Count': len(self.outliers['failures'].get('incomplete_cases', []))},
-                    {'Pattern': 'Long Running', 'Count': len(self.outliers['failures'].get('long_running', []))},
-                    {'Pattern': 'Resource Switches',
-                     'Count': len(self.outliers['failures'].get('resource_switches', []))},
-                    {'Pattern': 'Rework Activities',
-                     'Count': len(self.outliers['failures'].get('rework_activities', []))}
-                ]
-
-                if failure_data:
-                    figs['failure_patterns'] = px.bar(
-                        failure_data,
-                        x='Pattern',
-                        y='Count',
-                        title='Process Failure Patterns'
-                    )
-
-        except Exception as e:
-            logger.error(f"Error creating visualizations: {str(e)}")
-
-        return figs
-
-    def get_analysis_plots(self) -> Tuple[Dict[str, plt.Figure], Dict]:
-        """Generate all analysis plots and metrics"""
-        try:
-            metrics = {
-                'resource': self._calculate_resource_metrics(),
-                'time': self._calculate_time_metrics(),
-                'case': self._calculate_case_metrics(),
-                'handover': self._calculate_handover_metrics()
-            }
-
-            plots = {
-                'resource_discrimination': self._create_resource_plot(metrics['resource']),
-                'time_bias': self._create_time_plot(metrics['time']),
-                'case_priority': self._create_case_plot(metrics['case']),
-                'handover': self._create_handover_plot(metrics['handover'])
-            }
-
-            return plots, metrics
-
-        except Exception as e:
-            logger.error(f"Error generating analysis plots: {str(e)}")
-            return {}, {}
 
     def _format_ai_response(self, response_text: str) -> Dict:
         """Helper method to format AI response with enhanced logging"""
@@ -1243,10 +1129,68 @@ class UnfairOCELAnalyzer:
         """Display enhanced analysis with comprehensive outlier tracing"""
         try:
             # Create tabs for different analyses
-            tabs = st.tabs(["Resource Outlier", "Time Outlier", "Case Outlier       ", "Failure Patterns"])
+            tabs = st.tabs(["Failure Patterns", "Resource Outlier", "Time Outlier", "Case Outlier"])
+
+            # Failure Patterns Tab
+            with tabs[0]:
+                logger.debug("Processing Failure Patterns tab")
+                col1, col2 = st.columns([2, 1])
+
+                with col1:
+                    failure_counts = {
+                        'Sequence Violations': len(self.outliers['failures']['sequence_violations']),
+                        'Incomplete Cases': len(self.outliers['failures']['incomplete_cases']),
+                        'Long Running': len(self.outliers['failures']['long_running']),
+                        'Resource Switches': len(self.outliers['failures']['resource_switches']),
+                        'Rework Activities': len(self.outliers['failures']['rework_activities'])
+                    }
+
+                    fig = go.Figure(data=[
+                        go.Bar(
+                            x=list(failure_counts.keys()),
+                            y=list(failure_counts.values()),
+                            text=list(failure_counts.values()),
+                            textposition='auto',
+                        )
+                    ])
+
+                    fig.update_layout(
+                        title='Process Failure Patterns Distribution',
+                        xaxis_title='Failure Pattern Type',
+                        yaxis_title='Count',
+                        showlegend=False
+                    )
+                    st.plotly_chart(fig)
+
+                    # Show failure details in expandable sections
+                    for pattern, failures in self.outliers['failures'].items():
+                        if failures:
+                            with st.expander(f"{pattern.replace('_', ' ').title()} ({len(failures)})"):
+                                failure_df = pd.DataFrame(failures)
+                                st.dataframe(failure_df)
+
+                with col2:
+                    failure_metrics = {
+                        'sequence_violations': len(self.outliers['failures']['sequence_violations']),
+                        'incomplete_cases': len(self.outliers['failures']['incomplete_cases']),
+                        'long_running': len(self.outliers['failures']['long_running'])
+                    }
+                    st.markdown("### Understanding Failure Patterns")
+                    explanation = self.get_explanation('failure', failure_metrics)
+                    st.write(explanation.get('summary', ''))
+
+                    if explanation.get('insights'):
+                        st.write("#### Key Insights")
+                        for insight in explanation['insights']:
+                            st.write(f"• {insight}")
+
+                    if explanation.get('recommendations'):
+                        st.write("#### Recommendations")
+                        for rec in explanation['recommendations']:
+                            st.write(f"• {rec}")
 
             # Resource Analysis Tab
-            with tabs[0]:
+            with tabs[1]:
                 logger.debug("Processing Resource Analysis tab")
                 col1, col2 = st.columns([2, 1])
 
@@ -1381,7 +1325,7 @@ class UnfairOCELAnalyzer:
                             st.write(f"• {rec}")
 
             # Inside Time Analysis Tab section of display_enhanced_analysis method
-            with tabs[1]:  # Time Analysis Tab
+            with tabs[2]:  # Time Analysis Tab
                 col1, col2 = st.columns([2, 1])
 
                 with col1:
@@ -1493,7 +1437,7 @@ class UnfairOCELAnalyzer:
                             st.write(f"• {rec}")
 
             # Case Analysis Tab
-            with tabs[2]:
+            with tabs[3]:
                 logger.debug("Processing Case Analysis tab")
                 col1, col2 = st.columns([2, 1])
 
@@ -1524,6 +1468,34 @@ class UnfairOCELAnalyzer:
                         title='Case Complexity Distribution',
                         custom_data=['Activity Count']
                     )
+
+                    # Add expandable documentation section
+                    with st.expander("📖 How are case complexity outliers calculated?"):
+                        st.markdown("""
+                            ### Case Complexity Outlier Detection
+
+                            This analysis identifies unusual cases by examining multiple dimensions:
+
+                            **Metrics Analyzed:**
+                            - Total events per case
+                            - Unique activities performed
+                            - Number of different resources involved
+                            - Case duration
+                            - Object type variety (diff objects involved)
+
+                            **Detection Method:**
+                            1. Calculate z-scores across all metrics using vectorized operations
+                            2. Create composite z-score by averaging absolute z-scores
+                            3. Flag cases with composite z-score > 3 as outliers
+
+                            **Types of Outliers Detected:**
+                            - Unusually complex cases (high number of events/activities)
+                            - Cases with abnormal resource patterns
+                            - Exceptionally long-running cases
+                            - Cases with unusual object type interactions
+
+                            Each outlier case includes full event traceability for detailed investigation.
+                            """)
 
                     fig.update_traces(
                         hovertemplate=(
@@ -1590,64 +1562,6 @@ class UnfairOCELAnalyzer:
                     }
                     st.markdown("### Understanding Case Complexity")
                     explanation = self.get_explanation('case', case_metrics)
-                    st.write(explanation.get('summary', ''))
-
-                    if explanation.get('insights'):
-                        st.write("#### Key Insights")
-                        for insight in explanation['insights']:
-                            st.write(f"• {insight}")
-
-                    if explanation.get('recommendations'):
-                        st.write("#### Recommendations")
-                        for rec in explanation['recommendations']:
-                            st.write(f"• {rec}")
-
-            # Failure Patterns Tab
-            with tabs[3]:
-                logger.debug("Processing Failure Patterns tab")
-                col1, col2 = st.columns([2, 1])
-
-                with col1:
-                    failure_counts = {
-                        'Sequence Violations': len(self.outliers['failures']['sequence_violations']),
-                        'Incomplete Cases': len(self.outliers['failures']['incomplete_cases']),
-                        'Long Running': len(self.outliers['failures']['long_running']),
-                        'Resource Switches': len(self.outliers['failures']['resource_switches']),
-                        'Rework Activities': len(self.outliers['failures']['rework_activities'])
-                    }
-
-                    fig = go.Figure(data=[
-                        go.Bar(
-                            x=list(failure_counts.keys()),
-                            y=list(failure_counts.values()),
-                            text=list(failure_counts.values()),
-                            textposition='auto',
-                        )
-                    ])
-
-                    fig.update_layout(
-                        title='Process Failure Patterns Distribution',
-                        xaxis_title='Failure Pattern Type',
-                        yaxis_title='Count',
-                        showlegend=False
-                    )
-                    st.plotly_chart(fig)
-
-                    # Show failure details in expandable sections
-                    for pattern, failures in self.outliers['failures'].items():
-                        if failures:
-                            with st.expander(f"{pattern.replace('_', ' ').title()} ({len(failures)})"):
-                                failure_df = pd.DataFrame(failures)
-                                st.dataframe(failure_df)
-
-                with col2:
-                    failure_metrics = {
-                        'sequence_violations': len(self.outliers['failures']['sequence_violations']),
-                        'incomplete_cases': len(self.outliers['failures']['incomplete_cases']),
-                        'long_running': len(self.outliers['failures']['long_running'])
-                    }
-                    st.markdown("### Understanding Failure Patterns")
-                    explanation = self.get_explanation('failure', failure_metrics)
                     st.write(explanation.get('summary', ''))
 
                     if explanation.get('insights'):

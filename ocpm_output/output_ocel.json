@@ -12,11 +12,13 @@
       "Final Settlement"
     ],
     "attributes": [
+      "activity",
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
       "notional_amount",
+      "object_type",
       "resource",
       "timestamp"
     ],
@@ -67,18 +69,16 @@
       "Position Reconciliation"
     ],
     "attributes": [
-      "book",
       "book_id",
       "currency_pair",
-      "exposure",
       "position_id",
       "risk_exposure",
-      "risk_limit",
       "status",
       "timestamp",
       "trading_book"
     ],
     "relationships": [
+      "Client",
       "MarketData",
       "Trade"
     ]
@@ -108,7 +108,6 @@
       "source",
       "timestamp",
       "volatility",
-      "volatility_surface",
       "yield_curve"
     ],
     "relationships": [
@@ -127,6 +126,7 @@
     "attributes": [
       "client_id",
       "client_type",
+      "compliance_requirements",
       "credit_limit",
       "credit_limits",
       "preferred_execution_venue",
@@ -137,6 +137,7 @@
     ],
     "relationships": [
       "Order",
+      "Position",
       "Trade"
     ]
   }
