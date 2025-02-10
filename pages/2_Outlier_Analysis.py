@@ -1,4 +1,4 @@
-# APA_Analytics.py
+# 2_Outlier_Analysis.py
 import shutil
 import traceback
 import streamlit as st
@@ -152,6 +152,7 @@ class IntegratedAPAAnalyzer:
 
         return figures
 
+
 def run_unfairness_analysis():
     """Run unfairness analysis"""
     st.subheader("Outlier Analysis")
@@ -243,10 +244,6 @@ def setup_apa_page():
 
     st.info("APA provides comprehensive process analysis including AI-powered insights.")
 
-    # Create directories
-    os.makedirs("ocpm_data", exist_ok=True)
-    os.makedirs("ocpm_output", exist_ok=True)
-
     # Create tabs for different analyses
     main_tabs = st.tabs(["Process Analysis", "Outlier Analysis", "AI Insights"])
 
@@ -266,7 +263,7 @@ def setup_apa_page():
 
 if __name__ == "__main__":
     st.set_page_config(
-        page_title="IRMAI APA Analytics",
+        page_title="IRMAI APA Analysis",
         page_icon="📊",
         layout="wide"
     )
