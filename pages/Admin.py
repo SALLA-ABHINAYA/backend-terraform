@@ -12,32 +12,17 @@ def load_ocel_json(file_path: str, data_folder_path: str = None) -> Dict:
         data_folder_path: Data folder path
     """
     try:
-        original_path = file_path
+        # Form paths
         data_folder_file = os.path.join(data_folder_path, os.path.basename(file_path)) if data_folder_path else None
         
-        # Check if both files exist
-        original_exists = os.path.exists(original_path)
-        data_folder_exists = data_folder_file and os.path.exists(data_folder_file)
-        
-        if original_exists and data_folder_exists:
-            # Compare modification times
-            original_mtime = os.path.getmtime(original_path)
-            data_folder_mtime = os.path.getmtime(data_folder_file)
-            
-            # If original is newer, delete data folder file and use original
-            if original_mtime > data_folder_mtime:
-                os.remove(data_folder_file)
-                with open(original_path, 'r') as f:
-                    return json.load(f)
-        
-        # Try loading from data folder first if it exists
-        if data_folder_exists:
+        # If data folder file exists, use it without any checks
+        if data_folder_file and os.path.exists(data_folder_file):
             with open(data_folder_file, 'r') as f:
                 return json.load(f)
         
-        # Fall back to original path
-        if original_exists:
-            with open(original_path, 'r') as f:
+        # If no data folder file, try original path
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as f:
                 return json.load(f)
                 
         return {}
@@ -62,11 +47,43 @@ def save_ocel_json(data: Dict, file_path: str, data_folder_path: str = None) -> 
     
     # If data folder specified, save there too
     if data_folder_path:
-        # Create data folder if it doesn't exist
-        os.makedirs(data_folder_path, exist_ok=True)
-        data_file = os.path.join(data_folder_path, os.path.basename(file_path))
-        with open(data_file, 'w') as f:
-            json.dump(data, f, indent=2)
+        try:
+            # Create data folder if it doesn't exist
+            os.makedirs(data_folder_path, exist_ok=True)
+            data_file = os.path.join(data_folder_path, os.path.basename(file_path))
+            with open(data_file, 'w') as f:
+                json.dump(data, f, indent=2)
+
+            timestamp_file = os.path.join(data_folder_path, "last_update.txt")
+            current_time = str(time.time())
+            
+            if os.path.exists(timestamp_file):
+                # Read existing timestamps
+                with open(timestamp_file, 'r') as f:
+                    lines = f.readlines()
+                    timestamps = {}
+                    for line in lines:
+                        if ':' in line:
+                            key, value = line.strip().split(':', 1)
+                            timestamps[key] = value
+                
+                # Update current timestamp
+                timestamps['CURRENT_UPD_TIME'] = current_time
+                
+            else:
+                # Create new timestamp file
+                timestamps = {
+                    'CURRENT_UPD_TIME': current_time,
+                    'PREV_UPD_TIME': ''
+                }
+            
+            # Write updated timestamps
+            with open(timestamp_file, 'w') as f:
+                for key, value in timestamps.items():
+                    f.write(f"{key}:{value}\n")
+                
+        except Exception as e:
+            st.error(f"Error saving file: {str(e)}")
 
 
 def handle_add_threshold_activity(selected_type: str):
@@ -352,33 +369,35 @@ def setup_ocel_editor_page():
         st.info("Go to APA Analytics page and process your data to continue.")
         return
     
-   
-    
+    # Initialize base data
     if 'file_data' not in st.session_state:
         st.session_state.file_data = load_ocel_json(ocel_path, data_folder)
         
     if 'threshold_data' not in st.session_state:
         st.session_state.threshold_data = load_ocel_json(threshold_file, data_folder)
         
-    # Track file modification times
+    # Track file modification times only for output files
     if 'last_file_check' not in st.session_state:
         st.session_state.last_file_check = {
             'ocel': os.path.getmtime(ocel_path) if os.path.exists(ocel_path) else 0,
             'threshold': os.path.getmtime(threshold_file) if os.path.exists(threshold_file) else 0
         }
     
-    # Check if original files have been modified
-    current_ocel_mtime = os.path.getmtime(ocel_path) if os.path.exists(ocel_path) else 0
-    current_threshold_mtime = os.path.getmtime(threshold_file) if os.path.exists(threshold_file) else 0
+    data_ocel_file = os.path.join(data_folder, os.path.basename(ocel_path))
+    data_threshold_file = os.path.join(data_folder, os.path.basename(threshold_file))
     
-    # Reload data if original files have changed
-    if current_ocel_mtime > st.session_state.last_file_check['ocel']:
-        st.session_state.file_data = load_ocel_json(ocel_path, data_folder)
-        st.session_state.last_file_check['ocel'] = current_ocel_mtime
-        
-    if current_threshold_mtime > st.session_state.last_file_check['threshold']:
-        st.session_state.threshold_data = load_ocel_json(threshold_file, data_folder)
-        st.session_state.last_file_check['threshold'] = current_threshold_mtime
+    # Only check output files if data folder files don't exist
+    if not os.path.exists(data_ocel_file):
+        current_ocel_mtime = os.path.getmtime(ocel_path) if os.path.exists(ocel_path) else 0
+        if current_ocel_mtime > st.session_state.last_file_check['ocel']:
+            st.session_state.file_data = load_ocel_json(ocel_path, data_folder)
+            st.session_state.last_file_check['ocel'] = current_ocel_mtime
+            
+    if not os.path.exists(data_threshold_file):
+        current_threshold_mtime = os.path.getmtime(threshold_file) if os.path.exists(threshold_file) else 0
+        if current_threshold_mtime > st.session_state.last_file_check['threshold']:
+            st.session_state.threshold_data = load_ocel_json(threshold_file, data_folder)
+            st.session_state.last_file_check['threshold'] = current_threshold_mtime
     
     # Create tabs
     editor_tab, json_tab = st.tabs(["OCEL Editor", "OCEL Threshold Editor"])
