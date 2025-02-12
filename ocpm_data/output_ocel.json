@@ -2,9 +2,9 @@
   "Trade": {
     "name": "Trade",
     "activities": [
-      "Trade Initiated",
-      "Trade Execution",
+      "Trade Initiated a",
       "Trade Validation",
+      "Trade Execution",
       "Trade Confirmation",
       "Trade Matching",
       "Trade Reconciliation",
@@ -13,15 +13,17 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
-      "currency_pair",
+      "currency",
+      "execution_price",
+      "execution_time",
+      "fixing_convention",
+      "limit_usage",
       "notional_amount",
-      "option_type",
-      "premium",
-      "strike_price",
+      "risk_score",
+      "tenor",
       "trade_id",
-      "trading_strategy"
+      "trader"
     ],
     "relationships": [
       "Client",
@@ -35,29 +37,23 @@
     "activities": [
       "Quote Requested",
       "Quote Provided",
-      "Client Limit Validation",
       "Best Execution Validation",
+      "Client Limit Validation",
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
-      "Trade Allocation",
-      "Strategy Validation",
-      "Exercise Decision"
+      "Strategy Validation"
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
-      "currency_pair",
+      "currency",
+      "execution_price",
+      "execution_time",
+      "fixing_convention",
       "notional_amount",
-      "option_type",
       "order_id",
-      "order_type",
-      "premium",
-      "price",
-      "quantity",
-      "status",
-      "strike_price",
-      "trading_strategy"
+      "tenor",
+      "trader"
     ],
     "relationships": [
       "Client",
@@ -71,22 +67,19 @@
       "Position Reconciliation",
       "Risk Assessment",
       "Initial Margin Calculation",
-      "Collateral Management"
+      "Collateral Management",
+      "Risk Transfer Executed"
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
-      "currency_pair",
-      "delta",
-      "gamma",
+      "currency",
+      "fixing_convention",
       "limit_usage",
-      "option_type",
       "position_id",
       "risk_score",
-      "theta",
-      "trading_strategy",
-      "vega"
+      "tenor",
+      "trader"
     ],
     "relationships": [
       "Client",
@@ -98,35 +91,24 @@
     "name": "MarketData",
     "activities": [
       "Market Data Validation",
+      "Price Update",
       "Volatility Surface Analysis",
       "Greeks Calculation",
+      "Forward Points Calculation",
       "Premium Calculation",
-      "Surface Construction",
-      "Skew Calibration",
-      "Volatility Smile Analysis",
-      "Market Making Spread Calculation",
-      "CSA Verification",
-      "Transaction Reporting Check",
-      "Regulatory Reporting Generation"
+      "Reference Rate Published"
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
-      "currency_pair",
-      "delta",
-      "gamma",
+      "currency",
+      "execution_price",
+      "execution_time",
+      "fixing_convention",
       "market_data_id",
       "notional_amount",
-      "option_type",
-      "premium",
-      "reference_rate",
-      "strike_price",
-      "theta",
-      "trading_strategy",
-      "vega",
-      "volatility_surface",
-      "yield_curve"
+      "tenor",
+      "trader"
     ],
     "relationships": [
       "Order",
@@ -137,24 +119,20 @@
   "Client": {
     "name": "Client",
     "activities": [
-      "Credit Check",
+      "Credit Line Check",
       "Settlement Instructions",
-      "Premium Settlement"
+      "Premium Settlement",
+      "KYC Refresh Check",
+      "ISDA Master Agreement Check"
     ],
     "attributes": [
-      "booking_system",
-      "case_id",
       "client_id",
       "client_type",
-      "credit_limit",
+      "compliance_requirements",
       "credit_limits",
-      "currency_pair",
-      "option_type",
-      "preferred_execution_venue",
       "preferred_execution_venues",
       "settlement_instructions",
-      "trading_permissions",
-      "trading_strategy"
+      "trading_permissions"
     ],
     "relationships": [
       "Order",
