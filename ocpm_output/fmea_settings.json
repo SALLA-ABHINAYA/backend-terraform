@@ -1,0 +1,181 @@
+{
+  "object_visibility": {
+    "Trade": -1,
+    "Order": -2,
+    "Position": -2,
+    "MarketData": -3,
+    "Client": -1
+  },
+  "object_criticality": {
+    "Trade": 5,
+    "Order": 4,
+    "Position": 4,
+    "MarketData": 3,
+    "Client": 5
+  },
+  "temporal_dependencies": {
+    "Trade": {
+      "sequences": [
+        [
+          "Trade Initiated",
+          "Trade Execution",
+          "Trade Validation",
+          "Trade Confirmation",
+          "Trade Matching",
+          "Trade Reconciliation",
+          "Final Settlement"
+        ],
+        [
+          "Trade Reconciliation",
+          "Trade Transparency Assessment"
+        ]
+      ],
+      "constraints": {
+        "Trade Confirmation": "Must occur after Trade Validation",
+        "Final Settlement": "Must occur after Trade Matching"
+      },
+      "business_logic": [
+        "Trade Execution cannot proceed without valid MarketData",
+        "Trade Matching requires Order validation"
+      ],
+      "validation_requirements": [
+        "Trade Validation requires ISDA Master Agreement Check and Best Execution Validation"
+      ]
+    },
+    "Order": {
+      "sequences": [
+        [
+          "Quote Requested",
+          "Quote Provided",
+          "Client Limit Validation",
+          "Strategy Validation",
+          "ISDA Master Agreement Check",
+          "KYC Refresh Check",
+          "Best Execution Validation",
+          "Exercise Decision"
+        ]
+      ],
+      "constraints": {
+        "ISDA Master Agreement Check": "Must occur before Best Execution Validation",
+        "Exercise Decision": "Must occur after all validations"
+      },
+      "business_logic": [
+        "Quote Provided must align with MarketData validity",
+        "Client Limit Validation depends on Position attributes"
+      ],
+      "validation_requirements": [
+        "ISDA Master Agreement Check must be completed before trade execution"
+      ]
+    },
+    "Position": {
+      "sequences": [
+        [
+          "Position Reconciliation",
+          "Risk Assessment",
+          "Initial Margin Calculation",
+          "Collateral Management",
+          "Risk Transfer Executed"
+        ]
+      ],
+      "constraints": {
+        "Risk Transfer Executed": "Must occur after Risk Assessment",
+        "Collateral Management": "Requires Initial Margin Calculation"
+      },
+      "business_logic": [
+        "Risk Assessment depends on accurate MarketData and Trade attributes",
+        "Initial Margin Calculation requires updated Position data"
+      ],
+      "validation_requirements": [
+        "Position Reconciliation must be completed before risk evaluation"
+      ]
+    },
+    "MarketData": {
+      "sequences": [
+        [
+          "Market Data Validation",
+          "Volatility Surface Analysis",
+          "Greeks Calculation",
+          "Premium Calculation",
+          "CSA Verification",
+          "Transaction Reporting Check",
+          "Regulatory Reporting Generation"
+        ]
+      ],
+      "constraints": {
+        "Premium Calculation": "Requires Market Data Validation",
+        "Regulatory Reporting Generation": "Requires CSA Verification"
+      },
+      "business_logic": [
+        "Market Data Validation must occur before any trading activity",
+        "Transaction Reporting Check depends on trade attributes"
+      ],
+      "validation_requirements": [
+        "Market Data Validation must pass for Greeks Calculation to proceed"
+      ]
+    },
+    "Client": {
+      "sequences": [
+        [
+          "Credit Check",
+          "Settlement Instructions",
+          "Premium Settlement"
+        ]
+      ],
+      "constraints": {
+        "Settlement Instructions": "Must occur after Credit Check",
+        "Premium Settlement": "Requires valid Settlement Instructions"
+      },
+      "business_logic": [
+        "Credit Check is a prerequisite for any trade initiation",
+        "Premium Settlement requires Trade Confirmation and accurate Position data"
+      ],
+      "validation_requirements": [
+        "Credit Check must be validated before trade execution"
+      ]
+    }
+  },
+  "critical_activities": {
+    "Trade": [
+      "Trade Execution",
+      "Trade Validation",
+      "Final Settlement",
+      "Trade Matching",
+      "Trade Reconciliation"
+    ],
+    "Order": [
+      "Client Limit Validation",
+      "ISDA Master Agreement Check",
+      "Best Execution Validation",
+      "Exercise Decision"
+    ],
+    "Position": [
+      "Risk Assessment",
+      "Initial Margin Calculation",
+      "Collateral Management"
+    ],
+    "MarketData": [
+      "Market Data Validation",
+      "Premium Calculation",
+      "CSA Verification",
+      "Regulatory Reporting Generation"
+    ],
+    "Client": [
+      "Credit Check",
+      "Premium Settlement"
+    ]
+  },
+  "regulatory_keywords": [
+    "ISDA Master Agreement",
+    "KYC",
+    "Best Execution",
+    "Regulatory Reporting",
+    "Transaction Reporting",
+    "CSA Verification",
+    "Risk Assessment",
+    "Initial Margin",
+    "Collateral Management",
+    "Credit Check",
+    "Settlement Instructions",
+    "Trade Transparency"
+  ]
+}

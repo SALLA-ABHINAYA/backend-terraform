@@ -1,0 +1,143 @@
+{
+  "Trade": {
+    "name": "Trade",
+    "activities": [
+      "Trade Initiated a",
+      "Trade Validation",
+      "Trade Execution",
+      "Trade Confirmation",
+      "Trade Matching",
+      "Trade Reconciliation",
+      "Trade Transparency Assessment",
+      "Final Settlement"
+    ],
+    "attributes": [
+      "booking_system",
+      "client_type",
+      "currency",
+      "execution_price",
+      "execution_time",
+      "fixing_convention",
+      "limit_usage",
+      "notional_amount",
+      "risk_score",
+      "tenor",
+      "trade_id",
+      "trader"
+    ],
+    "relationships": [
+      "Client",
+      "MarketData",
+      "Order",
+      "Position"
+    ]
+  },
+  "Order": {
+    "name": "Order",
+    "activities": [
+      "Quote Requested",
+      "Quote Provided",
+      "Best Execution Validation",
+      "Client Limit Validation",
+      "ISDA Master Agreement Check",
+      "KYC Refresh Check",
+      "Strategy Validation"
+    ],
+    "attributes": [
+      "booking_system",
+      "client_type",
+      "currency",
+      "execution_price",
+      "execution_time",
+      "fixing_convention",
+      "notional_amount",
+      "order_id",
+      "tenor",
+      "trader"
+    ],
+    "relationships": [
+      "Client",
+      "MarketData",
+      "Trade"
+    ]
+  },
+  "Position": {
+    "name": "Position",
+    "activities": [
+      "Position Reconciliation",
+      "Risk Assessment",
+      "Initial Margin Calculation",
+      "Collateral Management",
+      "Risk Transfer Executed"
+    ],
+    "attributes": [
+      "booking_system",
+      "client_type",
+      "currency",
+      "fixing_convention",
+      "limit_usage",
+      "position_id",
+      "risk_score",
+      "tenor",
+      "trader"
+    ],
+    "relationships": [
+      "Client",
+      "MarketData",
+      "Trade"
+    ]
+  },
+  "MarketData": {
+    "name": "MarketData",
+    "activities": [
+      "Market Data Validation",
+      "Price Update",
+      "Volatility Surface Analysis",
+      "Greeks Calculation",
+      "Forward Points Calculation",
+      "Premium Calculation",
+      "Reference Rate Published"
+    ],
+    "attributes": [
+      "booking_system",
+      "client_type",
+      "currency",
+      "execution_price",
+      "execution_time",
+      "fixing_convention",
+      "market_data_id",
+      "notional_amount",
+      "tenor",
+      "trader"
+    ],
+    "relationships": [
+      "Order",
+      "Position",
+      "Trade"
+    ]
+  },
+  "Client": {
+    "name": "Client",
+    "activities": [
+      "Credit Line Check",
+      "Settlement Instructions",
+      "Premium Settlement",
+      "KYC Refresh Check",
+      "ISDA Master Agreement Check"
+    ],
+    "attributes": [
+      "client_id",
+      "client_type",
+      "compliance_requirements",
+      "credit_limits",
+      "preferred_execution_venues",
+      "settlement_instructions",
+      "trading_permissions"
+    ],
+    "relationships": [
+      "Order",
+      "Position",
+      "Trade"
+    ]
+  }
+}

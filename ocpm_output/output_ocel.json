@@ -3,8 +3,8 @@
     "name": "Trade",
     "activities": [
       "Trade Initiated",
-      "Trade Validation",
       "Trade Execution",
+      "Trade Validation",
       "Trade Confirmation",
       "Trade Matching",
       "Trade Reconciliation",
@@ -12,15 +12,15 @@
       "Final Settlement"
     ],
     "attributes": [
-      "activity",
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
       "notional_amount",
-      "object_type",
-      "resource",
-      "timestamp"
+      "option_type",
+      "premium",
+      "strike_price",
+      "trading_strategy"
     ],
     "relationships": [
       "Client",
@@ -42,13 +42,12 @@
       "Exercise Decision"
     ],
     "attributes": [
-      "client_id",
-      "order_id",
-      "order_type",
-      "price",
-      "quantity",
-      "status",
-      "timestamp"
+      "booking_system",
+      "case_id",
+      "client_type",
+      "currency_pair",
+      "option_type",
+      "trading_strategy"
     ],
     "relationships": [
       "Client",
@@ -59,37 +58,26 @@
   "Position": {
     "name": "Position",
     "activities": [
-      "Position Updated",
-      "Risk Limit Checked",
-      "Position Reconciled",
-      "Risk Transfer Executed",
-      "Initial Margin Calculation",
+      "Position Reconciliation",
       "Risk Assessment",
-      "Collateral Management",
-      "Position Reconciliation"
+      "Initial Margin Calculation",
+      "Collateral Management"
     ],
     "attributes": [
-      "book_id",
+      "case_id",
+      "client_type",
       "currency_pair",
-      "position_id",
-      "risk_exposure",
-      "status",
-      "timestamp",
-      "trading_book"
+      "limit_usage",
+      "risk_score"
     ],
     "relationships": [
       "Client",
-      "MarketData",
       "Trade"
     ]
   },
   "MarketData": {
     "name": "MarketData",
     "activities": [
-      "Price Update",
-      "Reference Rate Published",
-      "Market Status Change",
-      "Trading Hours Update",
       "Market Data Validation",
       "Volatility Surface Analysis",
       "Greeks Calculation",
@@ -99,20 +87,19 @@
       "Regulatory Reporting Generation"
     ],
     "attributes": [
+      "booking_system",
+      "case_id",
+      "client_type",
       "currency_pair",
-      "data_id",
-      "market_data_id",
-      "price",
-      "quote",
-      "reference_rate",
-      "source",
-      "timestamp",
-      "volatility",
-      "yield_curve"
+      "delta",
+      "gamma",
+      "option_type",
+      "theta",
+      "trading_strategy",
+      "vega"
     ],
     "relationships": [
       "Order",
-      "Position",
       "Trade"
     ]
   },
@@ -124,16 +111,11 @@
       "Premium Settlement"
     ],
     "attributes": [
-      "client_id",
+      "booking_system",
+      "case_id",
       "client_type",
-      "compliance_requirements",
-      "credit_limit",
-      "credit_limits",
-      "preferred_execution_venue",
-      "preferred_execution_venues",
-      "settlement_instructions",
-      "timestamp",
-      "trading_permissions"
+      "currency_pair",
+      "trading_strategy"
     ],
     "relationships": [
       "Order",

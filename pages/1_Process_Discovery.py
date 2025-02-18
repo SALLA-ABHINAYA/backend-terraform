@@ -19,7 +19,7 @@ if azure_file_path:
     os.environ["PATH"] = os.environ["PATH"] + ":" + azure_file_path
 else:
     # We're in Windows local environment
-    graphviz_path = "C:\\samadhi\\technology\\Graphviz\\bin"
+    graphviz_path = "C:\\Program Files\\Graphviz\\bin"
     os.environ["PATH"] = os.environ["PATH"] + ";" + graphviz_path
 
 
@@ -109,6 +109,73 @@ def visualize_risk_distribution(risk_assessment_results):
 
     return fig
 
+def show_loader():
+    """Show full-screen loader including sidebar"""
+    st.markdown(
+        """
+        <style>
+            /* Full-screen overlay */
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.3);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            }
+            
+            /* Loader animation */
+            .loader {
+                border: 8px solid #f3f3f3;
+                border-top: 8px solid #3498db;
+                border-radius: 50%;
+                width: 80px;
+                height: 80px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            /* Ensure Streamlit sidebar is also covered */
+            [data-testid="stSidebar"] {
+                z-index: 9999 !important;
+            }
+        </style>
+
+        <div class="overlay" id="loader">
+            <div class="loader"></div>
+        </div>
+
+        <script>
+            function hideLoader() {
+                var loader = document.getElementById("loader");
+                if (loader) {
+                    loader.style.display = "none";
+                }
+            }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+def hide_loader():
+    """Hide loader"""
+    st.markdown(
+        """
+        <style>
+            .overlay { display: none; }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 # In 1_Process_Discovery.py
 
@@ -123,11 +190,12 @@ def main():
     uploaded_file = st.file_uploader("Upload Event Log (CSV)", type=['csv'])
 
     if uploaded_file is not None:
+        show_loader()
         try:
-            with st.spinner('Processing data...'):
                 # Save and analyze file
-                file_path = save_uploaded_file(uploaded_file)
-                bpmn_graph, event_log = process_mining_analysis(file_path)
+            file_path = save_uploaded_file(uploaded_file)
+            bpmn_graph, event_log = process_mining_analysis(file_path)
+            hide_loader()
 
             st.success('Analysis completed successfully!')
 
@@ -154,6 +222,7 @@ def main():
             st.write("1. Your CSV file has the required columns: case_id, activity, timestamp")
             st.write("2. The data format is correct")
             st.write("3. Graphviz is installed and in your system PATH")
+            hide_loader()
 
 
 def process_mining_analysis(csv_path):
