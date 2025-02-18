@@ -35,13 +35,13 @@
     "activities": [
       "Quote Requested",
       "Quote Provided",
+      "Trade Allocation",
+      "Exercise Decision",
       "Client Limit Validation",
       "Best Execution Validation",
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
-      "Trade Allocation",
-      "Strategy Validation",
-      "Exercise Decision"
+      "Best Execution Validation"
     ],
     "attributes": [
       "booking_system",
@@ -101,9 +101,9 @@
       "Volatility Surface Analysis",
       "Greeks Calculation",
       "Premium Calculation",
-      "Surface Construction",
-      "Skew Calibration",
       "Volatility Smile Analysis",
+      "Skew Calibration",
+      "Surface Construction",
       "Market Making Spread Calculation",
       "CSA Verification",
       "Transaction Reporting Check",
@@ -117,18 +117,13 @@
       "delta",
       "gamma",
       "market_data_id",
-      "notional_amount",
       "option_type",
-      "premium",
-      "reference_rate",
-      "strike_price",
       "theta",
       "trading_strategy",
-      "vega",
-      "volatility_surface",
-      "yield_curve"
+      "vega"
     ],
     "relationships": [
+      "Client",
       "Order",
       "Position",
       "Trade"
@@ -138,19 +133,24 @@
     "name": "Client",
     "activities": [
       "Credit Check",
+      "Client Limit Validation",
+      "KYC Refresh Check",
+      "ISDA Master Agreement Check",
       "Settlement Instructions",
-      "Premium Settlement"
+      "Premium Settlement",
+      "CSA Verification"
     ],
     "attributes": [
       "booking_system",
       "case_id",
       "client_id",
       "client_type",
+      "compliance_requirements",
+      "compliance_status",
       "credit_limit",
       "credit_limits",
       "currency_pair",
       "option_type",
-      "preferred_execution_venue",
       "preferred_execution_venues",
       "settlement_instructions",
       "trading_permissions",
