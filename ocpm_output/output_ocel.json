@@ -20,7 +20,6 @@
       "option_type",
       "premium",
       "strike_price",
-      "trade_id",
       "trading_strategy"
     ],
     "relationships": [
@@ -35,28 +34,19 @@
     "activities": [
       "Quote Requested",
       "Quote Provided",
-      "Trade Allocation",
-      "Exercise Decision",
       "Client Limit Validation",
-      "Best Execution Validation",
+      "Strategy Validation",
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
-      "Best Execution Validation"
+      "Best Execution Validation",
+      "Exercise Decision"
     ],
     "attributes": [
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
-      "notional_amount",
       "option_type",
-      "order_id",
-      "order_type",
-      "premium",
-      "price",
-      "quantity",
-      "status",
-      "strike_price",
       "trading_strategy"
     ],
     "relationships": [
@@ -74,23 +64,14 @@
       "Collateral Management"
     ],
     "attributes": [
-      "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
-      "delta",
-      "gamma",
       "limit_usage",
-      "option_type",
-      "position_id",
-      "risk_score",
-      "theta",
-      "trading_strategy",
-      "vega"
+      "risk_score"
     ],
     "relationships": [
       "Client",
-      "MarketData",
       "Trade"
     ]
   },
@@ -101,10 +82,6 @@
       "Volatility Surface Analysis",
       "Greeks Calculation",
       "Premium Calculation",
-      "Volatility Smile Analysis",
-      "Skew Calibration",
-      "Surface Construction",
-      "Market Making Spread Calculation",
       "CSA Verification",
       "Transaction Reporting Check",
       "Regulatory Reporting Generation"
@@ -116,16 +93,13 @@
       "currency_pair",
       "delta",
       "gamma",
-      "market_data_id",
       "option_type",
       "theta",
       "trading_strategy",
       "vega"
     ],
     "relationships": [
-      "Client",
       "Order",
-      "Position",
       "Trade"
     ]
   },
@@ -133,27 +107,14 @@
     "name": "Client",
     "activities": [
       "Credit Check",
-      "Client Limit Validation",
-      "KYC Refresh Check",
-      "ISDA Master Agreement Check",
       "Settlement Instructions",
-      "Premium Settlement",
-      "CSA Verification"
+      "Premium Settlement"
     ],
     "attributes": [
       "booking_system",
       "case_id",
-      "client_id",
       "client_type",
-      "compliance_requirements",
-      "compliance_status",
-      "credit_limit",
-      "credit_limits",
       "currency_pair",
-      "option_type",
-      "preferred_execution_venues",
-      "settlement_instructions",
-      "trading_permissions",
       "trading_strategy"
     ],
     "relationships": [
