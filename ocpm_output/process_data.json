@@ -317,12 +317,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_1",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_1",
-          "type": "Trade"
+          "id": "Order_Case_1",
+          "type": "Order"
         }
       ]
     },
@@ -844,12 +844,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_10",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_10",
-          "type": "Trade"
+          "id": "Order_Case_10",
+          "type": "Order"
         }
       ]
     },
@@ -1473,12 +1473,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_100",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_100",
-          "type": "Trade"
+          "id": "Order_Case_100",
+          "type": "Order"
         }
       ]
     },
@@ -1626,12 +1626,12 @@
       "ocel:attributes": {
         "resource": "Hedge Desk C",
         "case_id": "Case_1000",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_1000",
-          "type": "Trade"
+          "id": "Order_Case_1000",
+          "type": "Order"
         }
       ]
     },
@@ -2069,10 +2069,10 @@
       }
     },
     {
-      "ocel:id": "Trade_Trade Transparency Assessment",
+      "ocel:id": "Trade_Final Settlement",
       "ocel:type": "Trade",
       "ocel:attributes": {
-        "activity": "Trade Transparency Assessment",
+        "activity": "Final Settlement",
         "attributes": [
           "booking_system",
           "case_id",
@@ -2087,10 +2087,10 @@
       }
     },
     {
-      "ocel:id": "Trade_Final Settlement",
+      "ocel:id": "Trade_Trade Transparency Assessment",
       "ocel:type": "Trade",
       "ocel:attributes": {
-        "activity": "Final Settlement",
+        "activity": "Trade Transparency Assessment",
         "attributes": [
           "booking_system",
           "case_id",
@@ -2225,16 +2225,34 @@
       }
     },
     {
+      "ocel:id": "Order_Trade Allocation",
+      "ocel:type": "Order",
+      "ocel:attributes": {
+        "activity": "Trade Allocation",
+        "attributes": [
+          "booking_system",
+          "case_id",
+          "client_type",
+          "currency_pair",
+          "option_type",
+          "trading_strategy"
+        ]
+      }
+    },
+    {
       "ocel:id": "Position_Position Reconciliation",
       "ocel:type": "Position",
       "ocel:attributes": {
         "activity": "Position Reconciliation",
         "attributes": [
+          "booking_system",
           "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "risk_score"
+          "option_type",
+          "risk_score",
+          "trading_strategy"
         ]
       }
     },
@@ -2244,11 +2262,14 @@
       "ocel:attributes": {
         "activity": "Risk Assessment",
         "attributes": [
+          "booking_system",
           "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "risk_score"
+          "option_type",
+          "risk_score",
+          "trading_strategy"
         ]
       }
     },
@@ -2258,11 +2279,14 @@
       "ocel:attributes": {
         "activity": "Initial Margin Calculation",
         "attributes": [
+          "booking_system",
           "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "risk_score"
+          "option_type",
+          "risk_score",
+          "trading_strategy"
         ]
       }
     },
@@ -2272,11 +2296,14 @@
       "ocel:attributes": {
         "activity": "Collateral Management",
         "attributes": [
+          "booking_system",
           "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "risk_score"
+          "option_type",
+          "risk_score",
+          "trading_strategy"
         ]
       }
     },
@@ -2422,7 +2449,6 @@
           "booking_system",
           "case_id",
           "client_type",
-          "currency_pair",
           "trading_strategy"
         ]
       }
@@ -2436,7 +2462,6 @@
           "booking_system",
           "case_id",
           "client_type",
-          "currency_pair",
           "trading_strategy"
         ]
       }
@@ -2450,7 +2475,6 @@
           "booking_system",
           "case_id",
           "client_type",
-          "currency_pair",
           "trading_strategy"
         ]
       }

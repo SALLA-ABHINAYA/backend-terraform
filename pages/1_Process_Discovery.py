@@ -1,6 +1,4 @@
-# app.py
 import shutil
-
 import streamlit as st
 import pm4py
 from pm4py.visualization.petri_net import visualizer as pn_visualizer
@@ -10,7 +8,6 @@ import os, json
 import plotly.graph_objects as go
 from process_mining_enhanced import FXProcessMining
 from risk_analysis import ProcessRiskAnalyzer, EnhancedFMEA
-
 
 # Set up Graphviz path based on environment
 azure_file_path = os.getenv("AZURE_FILE_PATH")
@@ -22,7 +19,6 @@ else:
     graphviz_path = "C:\\Program Files\\Graphviz\\bin"
     os.environ["PATH"] = os.environ["PATH"] + ";" + graphviz_path
 
-
 def create_directories():
     """Create necessary directories if they don't exist"""
     directories = ['data', 'output', 'staging']
@@ -33,7 +29,6 @@ def create_directories():
     # Create directories
     os.makedirs("ocpm_data", exist_ok=True)
     os.makedirs("ocpm_output", exist_ok=True)
-
 
 def save_uploaded_file(uploaded_file):
     """Save uploaded file to data directory"""
@@ -72,7 +67,6 @@ def analyze_risks(event_log, bpmn_graph):
     except Exception as e:
         st.error(f"Error in risk assessment: {str(e)}")
         raise
-
 
 def visualize_risk_distribution(risk_assessment_results):
     """Create visualization of risk distribution"""
@@ -176,7 +170,6 @@ def hide_loader():
         unsafe_allow_html=True
     )
 
-
 # In 1_Process_Discovery.py
 
 def main():
@@ -186,35 +179,29 @@ def main():
     st.title("📊 Process Discovery")
     st.info("Upload your Event Log to perform Process Discovery.")
 
+    # Initialize session state
+    if 'uploaded_file' not in st.session_state:
+        st.session_state.uploaded_file = None
+    if 'bpmn_graph' not in st.session_state:
+        st.session_state.bpmn_graph = None
+    if 'event_log' not in st.session_state:
+        st.session_state.event_log = None
+
     # File Upload
     uploaded_file = st.file_uploader("Upload Event Log (CSV)", type=['csv'])
 
     if uploaded_file is not None:
+        st.session_state.uploaded_file = uploaded_file
         show_loader()
         try:
-                # Save and analyze file
+            # Save and analyze file
             file_path = save_uploaded_file(uploaded_file)
             bpmn_graph, event_log = process_mining_analysis(file_path)
+            st.session_state.bpmn_graph = bpmn_graph
+            st.session_state.event_log = event_log
             hide_loader()
 
             st.success('Analysis completed successfully!')
-
-            # Create tabs for different analysis sections
-            tabs = st.tabs(["Process Discovery"])
-
-            # Process Mining Tab
-            with tabs[0]:
-                st.subheader("Process Discovery")
-
-                # Display process visualizations
-                st.subheader("Process Visualizations")
-                viz_tabs = st.tabs(["BPMN", "Petri Net", "Process Tree"])
-                with viz_tabs[0]:
-                    st.image("output/fx_trade_bpmn.png")
-                with viz_tabs[1]:
-                    st.image("output/fx_trade_petri_net.png")
-                with viz_tabs[2]:
-                    st.image("output/fx_trade_process_tree.png")
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
@@ -224,6 +211,23 @@ def main():
             st.write("3. Graphviz is installed and in your system PATH")
             hide_loader()
 
+    if st.session_state.uploaded_file is not None:
+        # Create tabs for different analysis sections
+        tabs = st.tabs(["Process Discovery"])
+
+        # Process Mining Tab
+        with tabs[0]:
+            st.subheader("Process Discovery")
+
+            # Display process visualizations
+            st.subheader("Process Visualizations")
+            viz_tabs = st.tabs(["BPMN", "Petri Net", "Process Tree"])
+            with viz_tabs[0]:
+                st.image("output/fx_trade_bpmn.png")
+            with viz_tabs[1]:
+                st.image("output/fx_trade_petri_net.png")
+            with viz_tabs[2]:
+                st.image("output/fx_trade_process_tree.png")
 
 def process_mining_analysis(csv_path):
     """Perform process mining analysis and save CSV for later use"""

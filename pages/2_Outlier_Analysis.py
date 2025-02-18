@@ -1,4 +1,3 @@
-# 2_Outlier_Analysis.py
 import shutil
 import traceback
 import streamlit as st
@@ -19,7 +18,6 @@ class IntegratedAPAAnalyzer:
     """Integrated APA Analytics with AI Analysis capabilities"""
 
     def __init__(self, api_key: str = None):
-
         # Initialize OpenAI client with working configuration from test file
         self.client = get_azure_openai_client()
         self.ocel_data = None
@@ -196,6 +194,9 @@ def run_ai_analysis():
     try:
         analyzer = IntegratedAPAAnalyzer()
         analyzer.load_ocel(ocel_path)
+
+        # Save statistics in session state
+        st.session_state['stats'] = analyzer.stats
 
         # Display Statistics
         col1, col2, col3 = st.columns(3)

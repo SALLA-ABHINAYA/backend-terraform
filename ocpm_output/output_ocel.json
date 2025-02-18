@@ -8,8 +8,8 @@
       "Trade Confirmation",
       "Trade Matching",
       "Trade Reconciliation",
-      "Trade Transparency Assessment",
-      "Final Settlement"
+      "Final Settlement",
+      "Trade Transparency Assessment"
     ],
     "attributes": [
       "booking_system",
@@ -39,7 +39,8 @@
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
       "Best Execution Validation",
-      "Exercise Decision"
+      "Exercise Decision",
+      "Trade Allocation"
     ],
     "attributes": [
       "booking_system",
@@ -64,11 +65,14 @@
       "Collateral Management"
     ],
     "attributes": [
+      "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
       "limit_usage",
-      "risk_score"
+      "option_type",
+      "risk_score",
+      "trading_strategy"
     ],
     "relationships": [
       "Client",
@@ -114,7 +118,6 @@
       "booking_system",
       "case_id",
       "client_type",
-      "currency_pair",
       "trading_strategy"
     ],
     "relationships": [
