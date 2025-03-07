@@ -1,8 +1,8 @@
 import shutil
 import traceback
 import streamlit as st
-from Unfair_Advanced_Process_Logs_Analytics import UnfairOCELAnalyzer
-from ocpm_analysis import create_ocpm_ui
+from Outlier_module.Unfair_Advanced_Process_Logs_Analytics import UnfairOCELAnalyzer
+from Outlier_module.ocpm_analysis import create_ocpm_ui
 import os
 from pathlib import Path
 from openai import OpenAI

@@ -6,8 +6,9 @@ from pm4py.visualization.process_tree import visualizer as pt_visualizer
 from pm4py.visualization.bpmn import visualizer as bpmn_visualizer
 import os, json
 import plotly.graph_objects as go
-from process_mining_enhanced import FXProcessMining
-from risk_analysis import ProcessRiskAnalyzer, EnhancedFMEA
+# from pages.Process_Discovery_module.process_mining_enhanced import FXProcessMining
+from Process_discovery_module.process_mining_enhanced import FXProcessMining
+from Process_discovery_module.risk_analysis import ProcessRiskAnalyzer, EnhancedFMEA
 
 # Set up Graphviz path based on environment
 azure_file_path = os.getenv("AZURE_FILE_PATH")

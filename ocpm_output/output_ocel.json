@@ -62,20 +62,25 @@
       "Position Reconciliation",
       "Risk Assessment",
       "Initial Margin Calculation",
-      "Collateral Management"
+      "Collateral Management",
+      "Risk Transfer Executed"
     ],
     "attributes": [
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
+      "delta",
+      "gamma",
       "limit_usage",
       "option_type",
       "risk_score",
-      "trading_strategy"
+      "theta",
+      "trading_strategy",
+      "vega"
     ],
     "relationships": [
-      "Client",
+      "MarketData",
       "Trade"
     ]
   },
@@ -104,6 +109,7 @@
     ],
     "relationships": [
       "Order",
+      "Position",
       "Trade"
     ]
   },
@@ -118,11 +124,11 @@
       "booking_system",
       "case_id",
       "client_type",
+      "currency_pair",
       "trading_strategy"
     ],
     "relationships": [
       "Order",
-      "Position",
       "Trade"
     ]
   }

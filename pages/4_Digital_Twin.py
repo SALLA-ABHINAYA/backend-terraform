@@ -15,14 +15,14 @@ import json
 import pandas as pd
 from typing import Dict, List, Tuple
 import logging
-import logging
 
 from pygments.lexers import go
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from IRMAI import FXTradingGapAnalyzer, GapAnalysisVisualizer
+
+from Digital_twin_module.digital_twin_class import FXTradingGapAnalyzer
 
 st.set_page_config(
     page_title="Digital Twin",

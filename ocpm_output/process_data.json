@@ -2249,10 +2249,14 @@
           "case_id",
           "client_type",
           "currency_pair",
+          "delta",
+          "gamma",
           "limit_usage",
           "option_type",
           "risk_score",
-          "trading_strategy"
+          "theta",
+          "trading_strategy",
+          "vega"
         ]
       }
     },
@@ -2266,10 +2270,14 @@
           "case_id",
           "client_type",
           "currency_pair",
+          "delta",
+          "gamma",
           "limit_usage",
           "option_type",
           "risk_score",
-          "trading_strategy"
+          "theta",
+          "trading_strategy",
+          "vega"
         ]
       }
     },
@@ -2283,10 +2291,14 @@
           "case_id",
           "client_type",
           "currency_pair",
+          "delta",
+          "gamma",
           "limit_usage",
           "option_type",
           "risk_score",
-          "trading_strategy"
+          "theta",
+          "trading_strategy",
+          "vega"
         ]
       }
     },
@@ -2300,10 +2312,35 @@
           "case_id",
           "client_type",
           "currency_pair",
+          "delta",
+          "gamma",
           "limit_usage",
           "option_type",
           "risk_score",
-          "trading_strategy"
+          "theta",
+          "trading_strategy",
+          "vega"
+        ]
+      }
+    },
+    {
+      "ocel:id": "Position_Risk Transfer Executed",
+      "ocel:type": "Position",
+      "ocel:attributes": {
+        "activity": "Risk Transfer Executed",
+        "attributes": [
+          "booking_system",
+          "case_id",
+          "client_type",
+          "currency_pair",
+          "delta",
+          "gamma",
+          "limit_usage",
+          "option_type",
+          "risk_score",
+          "theta",
+          "trading_strategy",
+          "vega"
         ]
       }
     },
@@ -2449,6 +2486,7 @@
           "booking_system",
           "case_id",
           "client_type",
+          "currency_pair",
           "trading_strategy"
         ]
       }
@@ -2462,6 +2500,7 @@
           "booking_system",
           "case_id",
           "client_type",
+          "currency_pair",
           "trading_strategy"
         ]
       }
@@ -2475,6 +2514,7 @@
           "booking_system",
           "case_id",
           "client_type",
+          "currency_pair",
           "trading_strategy"
         ]
       }
