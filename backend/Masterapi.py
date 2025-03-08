@@ -1,37 +1,14 @@
+# import the required modules
 import os
-import traceback
-from collections import defaultdict
-
-import numpy as np
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-from typing import Dict, List, Any, Set
-import json
-import logging
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-
-from tornado.websocket import WebSocketClosedError  # Correct import
-
-# Import the OCELFailureMode class from the OCELFailure.py file
-from FMEA_module.OCELFailure import OCELFailureMode
-
-# Import the fmea_utils.py file
-from FMEA_module.fmea_utils import get_fmea_insights, display_rpn_distribution, display_fmea_analysis
-
-# Import the OCELDataManager class from the OCELDataManager.py file
-from FMEA_module.OCELDataManager import OCELDataManager
-
-# Import the OCELEnhancedFMEA class from the OCELEnhancedFMEA.py file
-from FMEA_module.OCELEnhancedFMEA import OCELEnhancedFMEA
-
-from utils import get_azure_openai_client
-
 # Importing the fastapi for the API
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
+# import logging
+import logging
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Dict, List, Any, Set
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -43,6 +20,13 @@ logger = logging.getLogger(__name__)
 if not os.path.exists("api_response"):
     os.makedirs("api_response")
     logger.info('Directory created successfully')
+
+app = FastAPI()
+
+import json
+import pandas as pd
+from fastapi import File, UploadFile
+
 
 app = FastAPI()
 
@@ -105,6 +89,20 @@ async def post_fmea_settings(data: Dict[str, Any]):
     except Exception as e:
         logger.error(f"Error saving fmea_settings.json: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error saving fmea_settings.json: {str(e)}")
+
+@app.post("/event_log")
+async def post_event_log(file: UploadFile = File(...)):
+    try:
+        file_path = os.path.join("api_response", "event_log.csv")
+        with open(file_path, 'wb') as f:
+            content = await file.read()
+            f.write(content)
+        return JSONResponse(content={"message": "event_log.csv saved successfully"})
+    except Exception as e:
+        logger.error(f"Error saving event_log.csv: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error saving event_log.csv: {str(e)}")
+
+
 
 @app.get("/analyze")
 async def analyze():

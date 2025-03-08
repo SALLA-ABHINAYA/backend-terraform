@@ -230,8 +230,10 @@ def main():
             with viz_tabs[2]:
                 st.image("output/fx_trade_process_tree.png")
 
+import requests
+
 def process_mining_analysis(csv_path):
-    """Perform process mining analysis and save CSV for later use"""
+    """Perform process mining analysis, save CSV for later use, and send it via API"""
     try:
         # Create output directory if it doesn't exist
         os.makedirs("ocpm_output", exist_ok=True)
@@ -239,6 +241,21 @@ def process_mining_analysis(csv_path):
         # Copy uploaded file to output directory for use by Outlier Analysis
         output_csv_path = os.path.join("ocpm_output", "event_log.csv")
         shutil.copy2(csv_path, output_csv_path)
+
+        # Send the file via API POST request
+        try:
+            api_url = "http://127.0.0.1:8000/event_log"
+            with open(csv_path, 'rb') as f:
+                response = requests.post(api_url, files={'file': f})
+    
+            if response.status_code == 200:
+                st.success("File successfully sent to the API.")
+            else:
+                st.error(f"Failed to send file to the API. Status code: {response.status_code}")
+
+        except requests.exceptions.RequestException as e:
+            st.error(f"An error occurred while sending the file to the API: {str(e)}")
+
 
         # Initialize FX Process Mining
         fx_miner = FXProcessMining(csv_path)

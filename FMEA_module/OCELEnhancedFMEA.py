@@ -4,6 +4,7 @@ from collections import defaultdict
 import pandas as pd
 import os
 import json
+import requests
 
 # Increase pandas display limit
 pd.set_option("styler.render.max_elements", 600000)
@@ -243,6 +244,16 @@ class OCELEnhancedFMEA:
             output_path = os.path.join('ocpm_output', 'fmea_settings.json')
             with open(output_path, 'w') as f:
                 json.dump(obj=settings, fp=f, indent=2)
+
+            # Send settings to API endpoint via POST request
+            try:
+                response = requests.post("http://127.0.0.1:8000/fmea_settings", json=settings)
+                if response.status_code == 200:
+                    logger.info("FMEA settings successfully sent to API endpoint")
+                else:
+                    logger.error(f"Failed to send FMEA settings to API endpoint: {response.status_code} - {response.text}")
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Error sending FMEA settings to API endpoint: {str(e)}")
 
             logger.info(f"Generated FMEA settings saved to {output_path}")
             return settings

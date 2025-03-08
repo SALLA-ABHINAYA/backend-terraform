@@ -9,6 +9,8 @@ from typing import Dict, List, Optional, Tuple
 
 from utils import get_azure_openai_client
 import requests
+import datetime
+import os
 
 @dataclass
 class ObjectType:
@@ -185,8 +187,6 @@ def save_enhanced_prompt(prompt: str):
     Args:
         prompt: The enhanced prompt string to save
     """
-    import datetime
-    import os
 
     # Create output directory if it doesn't exist
     os.makedirs('ocpm_output', exist_ok=True)
@@ -201,13 +201,13 @@ def save_enhanced_prompt(prompt: str):
     print(f"Enhanced prompt saved to {filename}")
 
     # Send the prompt to an API endpoint
-    # api_endpoint = "http://127.0.0.1:8000/enhanced_prompt"
-    # try:
-    #     response = requests.post(api_endpoint, json={"prompt": prompt})
-    #     response.raise_for_status()
-    #     print(f"Prompt successfully sent to {api_endpoint}")
-    # except requests.exceptions.RequestException as e:
-    #     print(f"Failed to send prompt to API: {e}")
+    api_endpoint = "http://127.0.0.1:8000/enhanced_prompt"
+    try:
+        response = requests.post(api_endpoint, json={"prompt": prompt})
+        response.raise_for_status()
+        print(f"Prompt successfully sent to {api_endpoint}")
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to send prompt to API: {e}")
 
     ## Sending API to send the prompt
 
@@ -455,29 +455,29 @@ def process_chunk(chunk: pd.DataFrame, enhanced_prompt: str, client: AzureOpenAI
         return None
 
 
-def save_enhanced_prompt(prompt: str):
-    """
-    Saves the enhanced prompt to a file with timestamp in the filename.
-    Creates the output directory if it doesn't exist.
+# def save_enhanced_prompt(prompt: str):
+#     """
+#     Saves the enhanced prompt to a file with timestamp in the filename.
+#     Creates the output directory if it doesn't exist.
 
-    Args:
-        prompt: The enhanced prompt string to save
-    """
-    import datetime
-    import os
+#     Args:
+#         prompt: The enhanced prompt string to save
+#     """
+#     import datetime
+#     import os
 
 
-    # Create output directory if it doesn't exist
-    os.makedirs('ocpm_output', exist_ok=True)
+#     # Create output directory if it doesn't exist
+#     os.makedirs('ocpm_output', exist_ok=True)
 
-    # Generate timestamp for the filename
-    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f'ocpm_output/enhanced_prompt_{timestamp}.txt'
+#     # Generate timestamp for the filename
+#     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+#     filename = f'ocpm_output/enhanced_prompt_{timestamp}.txt'
 
-    # Write the prompt to file
-    with open(filename, 'w') as f:
-        f.write(prompt)
-    print(f"Enhanced prompt saved to {filename}")
+#     # Write the prompt to file
+#     with open(filename, 'w') as f:
+#         f.write(prompt)
+#     print(f"Enhanced prompt saved to {filename}")
 
 
 def process_log_file(df: pd.DataFrame, chunk_size=1000):

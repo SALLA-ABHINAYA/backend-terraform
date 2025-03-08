@@ -1,10 +1,10 @@
 {
   "object_visibility": {
-    "Trade": -1,
+    "Trade": -2,
     "Order": -2,
-    "Position": -2,
-    "MarketData": -1,
-    "Client": -3
+    "Position": -1,
+    "MarketData": -3,
+    "Client": -1
   },
   "object_criticality": {
     "Trade": 5,
@@ -14,143 +14,155 @@
     "Client": 5
   },
   "temporal_dependencies": {
-    "Trade": {
-      "required_sequence": [
-        "Trade Initiated",
-        "Trade Execution",
-        "Trade Validation",
-        "Trade Confirmation",
-        "Trade Matching",
-        "Trade Reconciliation",
-        "Final Settlement",
-        "Trade Transparency Assessment"
-      ],
-      "timing_constraints": {
-        "Trade Execution": "Must occur within 24 hours of Trade Initiated",
-        "Final Settlement": "Must occur within T+2 (Trade Date + 2 days)"
+    "Trade": [
+      {
+        "sequence": [
+          "Trade Initiated",
+          "Trade Execution",
+          "Trade Validation"
+        ],
+        "constraint": "Trade Validation must occur immediately after Trade Execution."
       },
-      "business_logic_dependencies": [
-        "Trade Validation requires accurate MarketData and Client information",
-        "Final Settlement depends on successful Trade Reconciliation"
-      ],
-      "validation_requirements": [
-        "Trade Matching must confirm against counterparty records",
-        "Trade Transparency Assessment must comply with regulatory standards"
-      ]
-    },
-    "Order": {
-      "required_sequence": [
-        "Quote Requested",
-        "Quote Provided",
-        "Client Limit Validation",
-        "Strategy Validation",
-        "ISDA Master Agreement Check",
-        "KYC Refresh Check",
-        "Best Execution Validation",
-        "Exercise Decision",
-        "Trade Allocation"
-      ],
-      "timing_constraints": {
-        "KYC Refresh Check": "Must occur prior to Trade Allocation",
-        "Best Execution Validation": "Must occur within 30 minutes of Quote Provided"
+      {
+        "sequence": [
+          "Trade Confirmation",
+          "Trade Matching",
+          "Trade Reconciliation",
+          "Final Settlement"
+        ],
+        "constraint": "Final Settlement must be completed within T+2 days."
       },
-      "business_logic_dependencies": [
-        "Client Limit Validation depends on accurate Client and Position data",
-        "ISDA Master Agreement Check requires valid legal documentation"
-      ],
-      "validation_requirements": [
-        "KYC Refresh Check must be compliant with anti-money laundering (AML) regulations",
-        "Best Execution Validation must adhere to MiFID II requirements"
-      ]
-    },
-    "Position": {
-      "required_sequence": [
-        "Position Reconciliation",
-        "Risk Assessment",
-        "Initial Margin Calculation",
-        "Collateral Management",
-        "Risk Transfer Executed"
-      ],
-      "timing_constraints": {
-        "Initial Margin Calculation": "Must align with daily market close",
-        "Risk Transfer Executed": "Must occur within 1 hour of Risk Assessment"
+      {
+        "sequence": [
+          "Trade Transparency Assessment"
+        ],
+        "constraint": "Must follow all other trade activities."
+      }
+    ],
+    "Order": [
+      {
+        "sequence": [
+          "Quote Requested",
+          "Quote Provided",
+          "Client Limit Validation"
+        ],
+        "constraint": "Client Limit Validation must follow Quote Provided."
       },
-      "business_logic_dependencies": [
-        "Risk Assessment depends on up-to-date MarketData and trade information",
-        "Collateral Management requires accurate Position Reconciliation"
-      ],
-      "validation_requirements": [
-        "Position Reconciliation must confirm balances with counterparties",
-        "Risk Assessment must be aligned with internal risk thresholds"
-      ]
-    },
-    "MarketData": {
-      "required_sequence": [
-        "Market Data Validation",
-        "Volatility Surface Analysis",
-        "Greeks Calculation",
-        "Premium Calculation",
-        "CSA Verification",
-        "Transaction Reporting Check",
-        "Regulatory Reporting Generation"
-      ],
-      "timing_constraints": {
-        "Market Data Validation": "Must occur at market open",
-        "Regulatory Reporting Generation": "Must meet end-of-day deadlines"
+      {
+        "sequence": [
+          "Strategy Validation",
+          "ISDA Master Agreement Check",
+          "KYC Refresh Check"
+        ],
+        "constraint": "ISDA Master Agreement Check and KYC Refresh Check must happen before Best Execution Validation."
       },
-      "business_logic_dependencies": [
-        "Greeks Calculation requires accurate Volatility Surface Analysis",
-        "CSA Verification depends on Premium Calculation accuracy"
-      ],
-      "validation_requirements": [
-        "Transaction Reporting Check must comply with EMIR and Dodd-Frank regulations",
-        "Regulatory Reporting Generation must align with jurisdictional requirements"
-      ]
-    },
-    "Client": {
-      "required_sequence": [
-        "Credit Check",
-        "Settlement Instructions",
-        "Premium Settlement"
-      ],
-      "timing_constraints": {
-        "Credit Check": "Must occur before any trade execution",
-        "Premium Settlement": "Must be completed within settlement cycle"
+      {
+        "sequence": [
+          "Best Execution Validation",
+          "Exercise Decision"
+        ],
+        "constraint": "Exercise Decision must be made within 24 hours of Best Execution Validation."
+      }
+    ],
+    "Position": [
+      {
+        "sequence": [
+          "Position Reconciliation",
+          "Risk Assessment",
+          "Initial Margin Calculation"
+        ],
+        "constraint": "Risk Assessment must immediately follow Position Reconciliation."
       },
-      "business_logic_dependencies": [
-        "Settlement Instructions require validated Client information",
-        "Premium Settlement depends on sufficient client credit and account setup"
-      ],
-      "validation_requirements": [
-        "Credit Check must comply with internal risk policies",
-        "Settlement Instructions must adhere to SWIFT standards"
-      ]
-    }
+      {
+        "sequence": [
+          "Collateral Management",
+          "Risk Transfer Executed"
+        ],
+        "constraint": "Collateral Management must complete before Risk Transfer Executed."
+      }
+    ],
+    "MarketData": [
+      {
+        "sequence": [
+          "Market Data Validation",
+          "Volatility Surface Analysis",
+          "Greeks Calculation"
+        ],
+        "constraint": "Volatility Surface Analysis must occur immediately after Market Data Validation."
+      },
+      {
+        "sequence": [
+          "Premium Calculation",
+          "CSA Verification"
+        ],
+        "constraint": "Premium Calculation must be completed before CSA Verification."
+      },
+      {
+        "sequence": [
+          "Transaction Reporting Check",
+          "Regulatory Reporting Generation"
+        ],
+        "constraint": "Transaction Reporting Check must precede Regulatory Reporting Generation."
+      }
+    ],
+    "Client": [
+      {
+        "sequence": [
+          "Credit Check",
+          "Settlement Instructions"
+        ],
+        "constraint": "Credit Check must occur before providing Settlement Instructions."
+      },
+      {
+        "sequence": [
+          "Premium Settlement"
+        ],
+        "constraint": "Premium Settlement must follow all other client-related activities."
+      }
+    ]
   },
-  "critical_activities": [
-    "Trade Execution",
-    "Trade Reconciliation",
-    "Final Settlement",
-    "Best Execution Validation",
-    "KYC Refresh Check",
-    "Position Reconciliation",
-    "Risk Assessment",
-    "Market Data Validation",
-    "Transaction Reporting Check",
-    "Credit Check",
-    "Premium Settlement"
-  ],
+  "critical_activities": {
+    "Trade": [
+      "Trade Execution",
+      "Trade Validation",
+      "Final Settlement",
+      "Trade Transparency Assessment"
+    ],
+    "Order": [
+      "Client Limit Validation",
+      "ISDA Master Agreement Check",
+      "Best Execution Validation",
+      "Exercise Decision"
+    ],
+    "Position": [
+      "Risk Assessment",
+      "Initial Margin Calculation",
+      "Collateral Management",
+      "Risk Transfer Executed"
+    ],
+    "MarketData": [
+      "Market Data Validation",
+      "Premium Calculation",
+      "Transaction Reporting Check",
+      "Regulatory Reporting Generation"
+    ],
+    "Client": [
+      "Credit Check",
+      "Settlement Instructions",
+      "Premium Settlement"
+    ]
+  },
   "regulatory_keywords": [
-    "AML",
-    "MiFID II",
-    "EMIR",
-    "Dodd-Frank",
     "ISDA Master Agreement",
     "KYC",
-    "Best Execution",
     "CSA Verification",
+    "Transaction Reporting",
     "Regulatory Reporting",
     "Risk Assessment",
-    "Transparency"
+    "Credit Check",
+    "Best Execution",
+    "Trade Transparency",
+    "Compliance",
+    "Settlement"
   ]
 }
