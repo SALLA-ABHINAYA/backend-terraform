@@ -9,6 +9,16 @@ import plotly.graph_objects as go
 # from pages.Process_Discovery_module.process_mining_enhanced import FXProcessMining
 from Process_discovery_module.process_mining_enhanced import FXProcessMining
 from Process_discovery_module.risk_analysis import ProcessRiskAnalyzer, EnhancedFMEA
+from io import StringIO
+import pandas as pd
+
+from Process_discovery_module.Process_discovery_utils import create_directories
+from Process_discovery_module.Process_discovery_utils import save_uploaded_file
+from Process_discovery_module.Process_discovery_utils import analyze_risks
+from Process_discovery_module.Process_discovery_utils import visualize_risk_distribution
+from Process_discovery_module.Process_discovery_utils import show_loader
+from Process_discovery_module.Process_discovery_utils import hide_loader
+from Process_discovery_module.Process_discovery_utils import process_mining_analysis
 
 # Set up Graphviz path based on environment
 azure_file_path = os.getenv("AZURE_FILE_PATH")
@@ -20,156 +30,6 @@ else:
     graphviz_path = "C:\\Program Files\\Graphviz\\bin"
     os.environ["PATH"] = os.environ["PATH"] + ";" + graphviz_path
 
-def create_directories():
-    """Create necessary directories if they don't exist"""
-    directories = ['data', 'output', 'staging']
-    for directory in directories:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-    # Create directories
-    os.makedirs("ocpm_data", exist_ok=True)
-    os.makedirs("ocpm_output", exist_ok=True)
-
-def save_uploaded_file(uploaded_file):
-    """Save uploaded file to data directory"""
-    create_directories()
-    file_path = os.path.join('data', uploaded_file.name)
-    with open(file_path, "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    return file_path
-
-def analyze_risks(event_log, bpmn_graph):
-    """Perform risk analysis on process model"""
-    try:
-        # Initialize ProcessRiskAnalyzer
-        risk_analyzer = ProcessRiskAnalyzer(event_log, bpmn_graph)
-        risk_analyzer.analyze_bpmn_graph()
-
-        # Initialize EnhancedFMEA
-        fmea = EnhancedFMEA(
-            failure_modes=risk_analyzer.failure_modes,
-            activity_stats=risk_analyzer.activity_stats
-        )
-
-        # Get risk assessment results
-        risk_assessment = fmea.assess_risk()
-
-        # Calculate process metrics
-        process_metrics = {
-            'total_activities': len(risk_analyzer.activity_stats),
-            'high_risk_activities': len([r for r in risk_assessment if r['rpn'] > 200]),
-            'medium_risk_activities': len([r for r in risk_assessment if 100 < r['rpn'] <= 200]),
-            'low_risk_activities': len([r for r in risk_assessment if r['rpn'] <= 100])
-        }
-
-        return risk_assessment, process_metrics
-
-    except Exception as e:
-        st.error(f"Error in risk assessment: {str(e)}")
-        raise
-
-def visualize_risk_distribution(risk_assessment_results):
-    """Create visualization of risk distribution"""
-    activities = [r['failure_mode'] for r in risk_assessment_results]
-    rpn_values = [r['rpn'] for r in risk_assessment_results]
-    severities = [r['severity'] for r in risk_assessment_results]
-    likelihoods = [r['likelihood'] for r in risk_assessment_results]
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=severities,
-        y=likelihoods,
-        mode='markers',
-        marker=dict(
-            size=[r['rpn'] * 5 for r in risk_assessment_results],
-            color=rpn_values,
-            colorscale='Viridis',
-            showscale=True,
-            colorbar=dict(title="RPN")
-        ),
-        text=activities,
-        hovertemplate="<b>Activity:</b> %{text}<br>" +
-                      "<b>Severity:</b> %{x:.2f}<br>" +
-                      "<b>Likelihood:</b> %{y:.2f}<br>" +
-                      "<b>RPN:</b> %{marker.color:.2f}<br>"
-    ))
-
-    fig.update_layout(
-        title="Risk Distribution Matrix",
-        xaxis_title="Severity",
-        yaxis_title="Likelihood",
-        showlegend=False
-    )
-
-    return fig
-
-def show_loader():
-    """Show full-screen loader including sidebar"""
-    st.markdown(
-        """
-        <style>
-            /* Full-screen overlay */
-            .overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.3);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            }
-            
-            /* Loader animation */
-            .loader {
-                border: 8px solid #f3f3f3;
-                border-top: 8px solid #3498db;
-                border-radius: 50%;
-                width: 80px;
-                height: 80px;
-                animation: spin 1s linear infinite;
-            }
-
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-
-            /* Ensure Streamlit sidebar is also covered */
-            [data-testid="stSidebar"] {
-                z-index: 9999 !important;
-            }
-        </style>
-
-        <div class="overlay" id="loader">
-            <div class="loader"></div>
-        </div>
-
-        <script>
-            function hideLoader() {
-                var loader = document.getElementById("loader");
-                if (loader) {
-                    loader.style.display = "none";
-                }
-            }
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
-
-def hide_loader():
-    """Hide loader"""
-    st.markdown(
-        """
-        <style>
-            .overlay { display: none; }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
 
 # In 1_Process_Discovery.py
 
@@ -189,28 +49,54 @@ def main():
         st.session_state.event_log = None
 
     # File Upload
-    uploaded_file = st.file_uploader("Upload Event Log (CSV)", type=['csv'])
+    # uploaded_file = st.file_uploader("Upload Event Log (CSV)", type=['csv'])
+    
 
-    if uploaded_file is not None:
-        st.session_state.uploaded_file = uploaded_file
-        show_loader()
-        try:
-            # Save and analyze file
-            file_path = save_uploaded_file(uploaded_file)
-            bpmn_graph, event_log = process_mining_analysis(file_path)
-            st.session_state.bpmn_graph = bpmn_graph
-            st.session_state.event_log = event_log
-            hide_loader()
 
-            st.success('Analysis completed successfully!')
+    # API endpoint
+    api_url = "http://127.0.0.1:8000/download_csv"
 
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-            st.write("Please ensure:")
-            st.write("1. Your CSV file has the required columns: case_id, activity, timestamp")
-            st.write("2. The data format is correct")
-            st.write("3. Graphviz is installed and in your system PATH")
-            hide_loader()
+    if st.button("Fetch CSV File"):
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            st.write("✅ Successfully fetched the CSV file.")
+
+            # ✅ Save CSV file immediately
+            csv_file_path = "api_response/downloaded_event_log.csv"
+            with open(csv_file_path, "wb") as f:
+                f.write(response.content)
+
+            # ✅ Read from saved file
+            df = pd.read_csv(csv_file_path)
+            
+            st.write("📄 CSV File Received:")
+            st.dataframe(df)
+
+            # ✅ Store file path in session state for further processing
+            st.session_state.uploaded_file = csv_file_path  
+
+            # ✅ Processing
+            show_loader()
+            try:
+                bpmn_graph, event_log = process_mining_analysis(csv_file_path)
+                st.session_state.bpmn_graph = bpmn_graph
+                st.session_state.event_log = event_log
+                hide_loader()
+                st.success('✅ Analysis completed successfully!')
+
+            except Exception as e:
+                hide_loader()
+                st.error(f"❌ An error occurred: {str(e)}")
+                st.write("🔹 Please ensure:")
+                st.write("1. Your CSV file has the required columns: `case_id`, `activity`, `timestamp`")
+                st.write("2. The data format is correct")
+                st.write("3. Graphviz is installed and in your system PATH")
+
+        else:
+            st.error("❌ Failed to fetch CSV file from API.")
+
+
 
     if st.session_state.uploaded_file is not None:
         # Create tabs for different analysis sections
@@ -232,60 +118,6 @@ def main():
 
 import requests
 
-def process_mining_analysis(csv_path):
-    """Perform process mining analysis, save CSV for later use, and send it via API"""
-    try:
-        # Create output directory if it doesn't exist
-        os.makedirs("ocpm_output", exist_ok=True)
 
-        # Copy uploaded file to output directory for use by Outlier Analysis
-        output_csv_path = os.path.join("ocpm_output", "event_log.csv")
-        shutil.copy2(csv_path, output_csv_path)
-
-        # Send the file via API POST request
-        try:
-            api_url = "http://127.0.0.1:8000/event_log"
-            with open(csv_path, 'rb') as f:
-                response = requests.post(api_url, files={'file': f})
-    
-            if response.status_code == 200:
-                st.success("File successfully sent to the API.")
-            else:
-                st.error(f"Failed to send file to the API. Status code: {response.status_code}")
-
-        except requests.exceptions.RequestException as e:
-            st.error(f"An error occurred while sending the file to the API: {str(e)}")
-
-
-        # Initialize FX Process Mining
-        fx_miner = FXProcessMining(csv_path)
-        fx_miner.preprocess_data()
-        fx_miner.discover_process()
-
-        # Get process model components
-        process_tree = fx_miner.process_tree
-        petri_net = fx_miner.process_model
-        initial_marking = fx_miner.initial_marking
-        final_marking = fx_miner.final_marking
-        event_log = fx_miner.event_log
-
-        # Generate visualizations
-        pn_gviz = pn_visualizer.apply(petri_net, initial_marking, final_marking)
-        pn_visualizer.save(pn_gviz, "output/fx_trade_petri_net.png")
-
-        pt_gviz = pt_visualizer.apply(process_tree)
-        pt_visualizer.save(pt_gviz, "output/fx_trade_process_tree.png")
-
-        bpmn_graph = pm4py.convert_to_bpmn(process_tree)
-        bpmn_gviz = bpmn_visualizer.apply(bpmn_graph)
-        bpmn_visualizer.save(bpmn_gviz, "output/fx_trade_bpmn.png")
-
-        return bpmn_graph, event_log
-
-    except Exception as e:
-        st.error(f"Error in process analytics analysis: {str(e)}")
-        import traceback
-        st.error(f"Traceback: {traceback.format_exc()}")
-        raise
 
 main()

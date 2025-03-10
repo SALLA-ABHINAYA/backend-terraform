@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Process Discovery - Upload CSV</h1>
+
+    <input type="file" id="csvFile" accept=".csv">
+    <button onclick="uploadCSV()">Upload</button>
+
+    <h2>Process Mining Results</h2>
+    <div id="results">
+        <h3>BPMN Model</h3>
+        <img id="bpmnImg" src="" style="display: none;" width="500px">
+
+        <h3>Petri Net</h3>
+        <img id="petriImg" src="" style="display: none;" width="500px">
+
+        <h3>Process Tree</h3>
+        <img id="processTreeImg" src="" style="display: none;" width="500px">
+    </div>
+
+    <script>
+        function uploadCSV() {
+            let fileInput = document.getElementById('csvFile');
+            let file = fileInput.files[0];
+            let formData = new FormData();
+            formData.append("file", file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("File uploaded successfully!");
+
+                // Display visualizations
+                document.getElementById("bpmnImg").src = data.bpmn_path;
+                document.getElementById("bpmnImg").style.display = "block";
+
+                document.getElementById("petriImg").src = data.petri_path;
+                document.getElementById("petriImg").style.display = "block";
+
+                document.getElementById("processTreeImg").src = data.process_tree_path;
+                document.getElementById("processTreeImg").style.display = "block";
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+{% endblock %}
