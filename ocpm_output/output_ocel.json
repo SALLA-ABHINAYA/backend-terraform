@@ -13,7 +13,6 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "notional_amount",
@@ -39,12 +38,10 @@
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
       "Best Execution Validation",
-      "Exercise Decision",
-      "Trade Allocation"
+      "Exercise Decision"
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "option_type",
@@ -62,20 +59,19 @@
       "Position Reconciliation",
       "Risk Assessment",
       "Initial Margin Calculation",
-      "Collateral Management"
+      "Collateral Management",
+      "Risk Transfer Executed"
     ],
     "attributes": [
-      "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "limit_usage",
-      "option_type",
       "risk_score",
       "trading_strategy"
     ],
     "relationships": [
       "Client",
+      "MarketData",
       "Trade"
     ]
   },
@@ -92,7 +88,6 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "delta",
@@ -104,6 +99,7 @@
     ],
     "relationships": [
       "Order",
+      "Position",
       "Trade"
     ]
   },
@@ -116,7 +112,6 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "trading_strategy"

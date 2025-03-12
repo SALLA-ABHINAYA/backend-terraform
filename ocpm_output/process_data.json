@@ -317,12 +317,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_1",
-        "object_type": "Order"
+        "object_type": "Trade"
       },
       "ocel:objects": [
         {
-          "id": "Order_Case_1",
-          "type": "Order"
+          "id": "Trade_Case_1",
+          "type": "Trade"
         }
       ]
     },
@@ -844,12 +844,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_10",
-        "object_type": "Order"
+        "object_type": "Trade"
       },
       "ocel:objects": [
         {
-          "id": "Order_Case_10",
-          "type": "Order"
+          "id": "Trade_Case_10",
+          "type": "Trade"
         }
       ]
     },
@@ -1473,12 +1473,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_100",
-        "object_type": "Order"
+        "object_type": "Trade"
       },
       "ocel:objects": [
         {
-          "id": "Order_Case_100",
-          "type": "Order"
+          "id": "Trade_Case_100",
+          "type": "Trade"
         }
       ]
     },
@@ -1626,12 +1626,12 @@
       "ocel:attributes": {
         "resource": "Hedge Desk C",
         "case_id": "Case_1000",
-        "object_type": "Order"
+        "object_type": "Trade"
       },
       "ocel:objects": [
         {
-          "id": "Order_Case_1000",
-          "type": "Order"
+          "id": "Trade_Case_1000",
+          "type": "Trade"
         }
       ]
     },
@@ -1967,7 +1967,6 @@
         "activity": "Trade Initiated",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -1985,7 +1984,6 @@
         "activity": "Trade Execution",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2003,7 +2001,6 @@
         "activity": "Trade Validation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2021,7 +2018,6 @@
         "activity": "Trade Confirmation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2039,7 +2035,6 @@
         "activity": "Trade Matching",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2057,7 +2052,6 @@
         "activity": "Trade Reconciliation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2075,7 +2069,6 @@
         "activity": "Final Settlement",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2093,7 +2086,6 @@
         "activity": "Trade Transparency Assessment",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "notional_amount",
@@ -2111,7 +2103,6 @@
         "activity": "Quote Requested",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2126,7 +2117,6 @@
         "activity": "Quote Provided",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2141,7 +2131,6 @@
         "activity": "Client Limit Validation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2156,7 +2145,6 @@
         "activity": "Strategy Validation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2171,7 +2159,6 @@
         "activity": "ISDA Master Agreement Check",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2186,7 +2173,6 @@
         "activity": "KYC Refresh Check",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2201,7 +2187,6 @@
         "activity": "Best Execution Validation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2216,22 +2201,6 @@
         "activity": "Exercise Decision",
         "attributes": [
           "booking_system",
-          "case_id",
-          "client_type",
-          "currency_pair",
-          "option_type",
-          "trading_strategy"
-        ]
-      }
-    },
-    {
-      "ocel:id": "Order_Trade Allocation",
-      "ocel:type": "Order",
-      "ocel:attributes": {
-        "activity": "Trade Allocation",
-        "attributes": [
-          "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "option_type",
@@ -2245,12 +2214,9 @@
       "ocel:attributes": {
         "activity": "Position Reconciliation",
         "attributes": [
-          "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "option_type",
           "risk_score",
           "trading_strategy"
         ]
@@ -2262,12 +2228,9 @@
       "ocel:attributes": {
         "activity": "Risk Assessment",
         "attributes": [
-          "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "option_type",
           "risk_score",
           "trading_strategy"
         ]
@@ -2279,12 +2242,9 @@
       "ocel:attributes": {
         "activity": "Initial Margin Calculation",
         "attributes": [
-          "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "option_type",
           "risk_score",
           "trading_strategy"
         ]
@@ -2296,12 +2256,23 @@
       "ocel:attributes": {
         "activity": "Collateral Management",
         "attributes": [
-          "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "limit_usage",
-          "option_type",
+          "risk_score",
+          "trading_strategy"
+        ]
+      }
+    },
+    {
+      "ocel:id": "Position_Risk Transfer Executed",
+      "ocel:type": "Position",
+      "ocel:attributes": {
+        "activity": "Risk Transfer Executed",
+        "attributes": [
+          "client_type",
+          "currency_pair",
+          "limit_usage",
           "risk_score",
           "trading_strategy"
         ]
@@ -2314,7 +2285,6 @@
         "activity": "Market Data Validation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2333,7 +2303,6 @@
         "activity": "Volatility Surface Analysis",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2352,7 +2321,6 @@
         "activity": "Greeks Calculation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2371,7 +2339,6 @@
         "activity": "Premium Calculation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2390,7 +2357,6 @@
         "activity": "CSA Verification",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2409,7 +2375,6 @@
         "activity": "Transaction Reporting Check",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2428,7 +2393,6 @@
         "activity": "Regulatory Reporting Generation",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "delta",
@@ -2447,7 +2411,6 @@
         "activity": "Credit Check",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "trading_strategy"
@@ -2461,7 +2424,6 @@
         "activity": "Settlement Instructions",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "trading_strategy"
@@ -2475,7 +2437,6 @@
         "activity": "Premium Settlement",
         "attributes": [
           "booking_system",
-          "case_id",
           "client_type",
           "currency_pair",
           "trading_strategy"

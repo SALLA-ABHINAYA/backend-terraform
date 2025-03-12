@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 from utils import get_azure_openai_client
-
+import plotly.express as px
 
 
 
