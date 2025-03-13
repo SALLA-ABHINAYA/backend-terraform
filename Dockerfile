@@ -4,6 +4,9 @@ FROM python:3.12.3
 # Set the working directory inside the container
 WORKDIR /app
 
+# Install system dependencies for PyAudio
+RUN apt-get update && apt-get install -y portaudio19-dev
+
 # Copy all project files into the container
 COPY . .
 
@@ -14,4 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # Run FastAPI server
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.MasterApi.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
