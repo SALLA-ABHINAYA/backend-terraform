@@ -38,7 +38,8 @@
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
       "Best Execution Validation",
-      "Exercise Decision"
+      "Exercise Decision",
+      "Trade Allocation"
     ],
     "attributes": [
       "booking_system",

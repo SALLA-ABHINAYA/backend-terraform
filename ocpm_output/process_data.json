@@ -317,12 +317,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_1",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_1",
-          "type": "Trade"
+          "id": "Order_Case_1",
+          "type": "Order"
         }
       ]
     },
@@ -844,12 +844,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_10",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_10",
-          "type": "Trade"
+          "id": "Order_Case_10",
+          "type": "Order"
         }
       ]
     },
@@ -1473,12 +1473,12 @@
       "ocel:attributes": {
         "resource": "Client Desk D",
         "case_id": "Case_100",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_100",
-          "type": "Trade"
+          "id": "Order_Case_100",
+          "type": "Order"
         }
       ]
     },
@@ -1626,12 +1626,12 @@
       "ocel:attributes": {
         "resource": "Hedge Desk C",
         "case_id": "Case_1000",
-        "object_type": "Trade"
+        "object_type": "Order"
       },
       "ocel:objects": [
         {
-          "id": "Trade_Case_1000",
-          "type": "Trade"
+          "id": "Order_Case_1000",
+          "type": "Order"
         }
       ]
     },
@@ -2199,6 +2199,20 @@
       "ocel:type": "Order",
       "ocel:attributes": {
         "activity": "Exercise Decision",
+        "attributes": [
+          "booking_system",
+          "client_type",
+          "currency_pair",
+          "option_type",
+          "trading_strategy"
+        ]
+      }
+    },
+    {
+      "ocel:id": "Order_Trade Allocation",
+      "ocel:type": "Order",
+      "ocel:attributes": {
+        "activity": "Trade Allocation",
         "attributes": [
           "booking_system",
           "client_type",

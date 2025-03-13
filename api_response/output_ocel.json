@@ -13,7 +13,6 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "notional_amount",
@@ -44,7 +43,6 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "option_type",
@@ -66,17 +64,15 @@
       "Risk Transfer Executed"
     ],
     "attributes": [
-      "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "limit_usage",
-      "option_type",
       "risk_score",
       "trading_strategy"
     ],
     "relationships": [
       "Client",
+      "MarketData",
       "Trade"
     ]
   },
@@ -93,7 +89,6 @@
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
       "delta",
@@ -105,6 +100,7 @@
     ],
     "relationships": [
       "Order",
+      "Position",
       "Trade"
     ]
   },
@@ -113,15 +109,12 @@
     "activities": [
       "Credit Check",
       "Settlement Instructions",
-      "Premium Settlement",
-      "KYC Refresh Check"
+      "Premium Settlement"
     ],
     "attributes": [
       "booking_system",
-      "case_id",
       "client_type",
       "currency_pair",
-      "option_type",
       "trading_strategy"
     ],
     "relationships": [
