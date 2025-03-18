@@ -47,7 +47,7 @@
 
     // Perform calculations
     function performCalculations() {
-        fetch('/calculate')
+        fetch('/calculate_bpmn')
         .then(response => response.json())
         .then(data => {
             console.log(data);

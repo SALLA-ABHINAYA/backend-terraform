@@ -24,7 +24,7 @@ from fastapi import HTTPException
 import pm4py
 
 import logging
-
+from fastapi import Depends
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -49,7 +49,7 @@ async def upload_csv(file: UploadFile = File(...)):
         f.write(content)
 
     # Example: Print CSV content (replace with processing logic)
-    print(df.head())
+    # print(df.head())
 
     return {"message": f"Successfully uploaded {file.filename}", "data": df.head().to_dict()}
 
@@ -60,7 +60,7 @@ import xml.dom.minidom
 from fastapi import HTTPException, Response
 import pm4py
 
-@router.get("/calculate")
+@router.get("/calculate_bpmn")
 async def calculate():
     try:
         try:
@@ -73,6 +73,7 @@ async def calculate():
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".bpmn")
         temp_file.close()
         
+
         # Write the BPMN graph to the temporary file
         pm4py.write_bpmn(bpmn_graph, temp_file.name)
         
@@ -103,7 +104,58 @@ async def calculate():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred during process mining analysis: {str(e)}")
 
+def check_fx_trade_process_tree_exists():
+    file_path = os.path.join("api_response", "fx_trade_process_tree.png")
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            image_content = f.read()
+        base64_image = base64.b64encode(image_content).decode("utf-8")
+        return {"exists": True, "image": base64_image}
+    else:
+        return {"exists": False, "image": None}
 
+@router.get("/fx_trade_process_tree_display")
+async def fx_trade_process_tree_display(process_tree_status: dict = Depends(check_fx_trade_process_tree_exists)):
+    try:
+        if not process_tree_status["exists"]:
+            raise HTTPException(status_code=404, detail="Process tree image not found")
+
+        return {
+            "success": True,
+            "status_code": 200,
+            "message": "Successfully retrieved process tree image",
+            "image": process_tree_status["image"],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+def check_fx_trade_bpmn_exists():
+    file_path = os.path.join("api_response", "fx_trade_bpmn.png")
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            image_content = f.read()
+        base64_image = base64.b64encode(image_content).decode("utf-8")
+        return {"exists": True, "image": base64_image}
+    else:
+        return {"exists": False, "image": None}
+
+@router.get("/fx_trade_bpmn_display")
+async def fx_trade_bpmn_display(bpmn_status: dict = Depends(check_fx_trade_bpmn_exists)):
+    try:
+        if not bpmn_status["exists"]:
+            raise HTTPException(status_code=404, detail="BPMN image not found")
+
+        return {
+            "success": True,
+            "status_code": 200,
+            "message": "Successfully retrieved BPMN image",
+            "image": bpmn_status["image"],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+## THIS ROUTER ENDPOINT IS ONLY FOR THE STREAMLIT INPUT
 @router.get("/download_csv")
 async def download_csv():
     file_path = os.path.join("data","fx_trade_log_small.csv")
@@ -400,12 +452,18 @@ from computation.FMEA_module.OCELEnhancedFMEA import OCELEnhancedFMEA
 
 from utils import get_azure_openai_client
 
+def convert_timestamps(obj):
+    if isinstance(obj, pd.Timestamp):
+        return obj.isoformat()  # Convert to ISO 8601 format
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
 
 @router.get("/fmea-analysis")
 def perform_fmea_analysis():
     try:
         # Verify OCEL model file exists
-        if not os.path.exists("api_response/output_ocel.json"):
+       # if not os.path.exists("api_response/output_ocel.json"): -->comeback if error is found
+        if not os.path.exists("api_response/process_data.json"):
             raise HTTPException(status_code=400, detail="OCEL model file not found. Run Outlier Analysis first.")
         
         # Load process data
@@ -422,10 +480,20 @@ def perform_fmea_analysis():
         
         # Perform FMEA analysis
         fmea_results = analyzer.identify_failure_modes()
+        # Save FMEA results to a JSON file
+        fmea_results_path = os.path.join("api_response", "fmea_results.json")
+        with open(fmea_results_path, "w") as f:
+            json.dump(fmea_results, f, indent=4, default=convert_timestamps)
+           # json.dump(fmea_results, f, indent=4)
         logger.info(f"Analysis complete. Found {len(fmea_results)} failure modes")
         
         # Get AI insights
+        
         ai_insights = get_fmea_insights(fmea_results)
+        # Save AI insights to a JSON file
+        ai_insights_path = os.path.join("api_response", "ai_insights.json")
+        with open(ai_insights_path, "w") as f:
+            json.dump(ai_insights, f, indent=4)
         
         return JSONResponse(content={
             "failure_modes": len(fmea_results),
@@ -444,4 +512,146 @@ def perform_fmea_analysis():
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
+
+
+
+@router.get("/rpn_distribution")
+async def display_rpn_distribution():
+    """
+    Display comprehensive RPN distribution visualization with analysis breakdowns.
+    This shows the spread of risk levels across different failure modes and helps
+    identify risk clusters and patterns.
+    """
+    try:
+        # Load FMEA results from a JSON file
+        fmea_results_path = os.path.join("api_response", "fmea_results.json")
+        if not os.path.exists(fmea_results_path):
+            raise HTTPException(status_code=404, detail="FMEA results file not found")
+
+        with open(fmea_results_path, "r") as f:
+            fmea_results = json.load(f)
+
+        # Create base RPN histogram
+        df = pd.DataFrame(fmea_results)
+        fig = go.Figure()
+
+        # Add main RPN distribution histogram
+        fig.add_trace(go.Histogram(
+            x=df['rpn'],
+            nbinsx=20,
+            name='RPN Distribution',
+            marker_color='blue',
+            opacity=0.7
+        ))
+
+        # Add critical threshold line
+        fig.add_vline(
+            x=200,
+            line_dash="dash",
+            line_color="red",
+            annotation_text="Critical Threshold (RPN=200)",
+            annotation_position="top right"
+        )
+
+        # Add risk zone annotations
+        fig.add_vrect(
+            x0=0, x1=100,
+            fillcolor="green", opacity=0.1,
+            layer="below", line_width=0,
+            annotation_text="Low Risk",
+            annotation_position="bottom"
+        )
+        fig.add_vrect(
+            x0=100, x1=200,
+            fillcolor="yellow", opacity=0.1,
+            layer="below", line_width=0,
+            annotation_text="Medium Risk",
+            annotation_position="bottom"
+        )
+        fig.add_vrect(
+            x0=200, x1=1000,
+            fillcolor="red", opacity=0.1,
+            layer="below", line_width=0,
+            annotation_text="High Risk",
+            annotation_position="bottom"
+        )
+
+        # Update layout with detailed information
+        fig.update_layout(
+            title={
+                'text': 'Risk Priority Number (RPN) Distribution',
+                'y': 0.95,
+                'x': 0.5,
+                'xanchor': 'center',
+                'yanchor': 'top'
+            },
+            xaxis_title='RPN Value',
+            yaxis_title='Number of Failure Modes',
+            showlegend=True,
+            height=500,
+            annotations=[
+                dict(
+                    x=50, y=1.05,
+                    text="Low Risk Zone",
+                    showarrow=False,
+                    xref='x', yref='paper',
+                    font=dict(color="green")
+                ),
+                dict(
+                    x=150, y=1.05,
+                    text="Medium Risk Zone",
+                    showarrow=False,
+                    xref='x', yref='paper',
+                    font=dict(color="orange")
+                ),
+                dict(
+                    x=250, y=1.05,
+                    text="High Risk Zone",
+                    showarrow=False,
+                    xref='x', yref='paper',
+                    font=dict(color="red")
+                )
+            ]
+        )
+
+        # Calculate distribution statistics
+        stats = {
+            "average_rpn": df['rpn'].mean(),
+            "median_rpn": df['rpn'].median(),
+            "std_deviation": df['rpn'].std(),
+            "90th_percentile": df['rpn'].quantile(0.9)
+        }
+
+        # Risk zone analysis
+        risk_zones = {
+            'Low Risk (RPN ≤ 100)': len(df[df['rpn'] <= 100]),
+            'Medium Risk (100 < RPN ≤ 200)': len(df[(df['rpn'] > 100) & (df['rpn'] <= 200)]),
+            'High Risk (RPN > 200)': len(df[df['rpn'] > 200])
+        }
+
+        # Create risk zone bar chart
+        risk_fig = go.Figure(data=[
+            go.Bar(
+                x=list(risk_zones.keys()),
+                y=list(risk_zones.values()),
+                marker_color=['green', 'yellow', 'red']
+            )
+        ])
+        risk_fig.update_layout(
+            title="Distribution by Risk Zone",
+            xaxis_title="Risk Zone",
+            yaxis_title="Number of Failure Modes",
+            height=400
+        )
+
+        return JSONResponse(content={
+            "rpn_distribution_plot": json.loads(fig.to_json()),
+            "risk_zone_plot": json.loads(risk_fig.to_json()),
+            "statistics": stats,
+            "risk_zones": risk_zones
+        })
+
+    except Exception as e:
+        logger.error(f"Error in display_rpn_distribution: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error displaying RPN distribution: {str(e)}")
 

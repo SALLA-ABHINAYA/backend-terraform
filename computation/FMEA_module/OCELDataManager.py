@@ -21,7 +21,7 @@ class OCELDataManager:
         """Initialize with path to OCEL data"""
         try:
             # Load OCEL relationship definitions
-            with open('ocpm_output/output_ocel.json', 'r') as f:
+            with open('api_response/output_ocel.json', 'r') as f:
                 self.ocel_model = json.load(f)
 
             

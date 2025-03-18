@@ -274,230 +274,230 @@ Log Analysis Details:
 }
 - Activity Attributes: {
   "Trade Initiated": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Execution": [
-    "premium",
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "notional_amount",
     "option_type",
+    "premium",
+    "trading_strategy",
     "strike_price",
-    "currency_pair",
-    "booking_system"
+    "currency_pair"
   ],
   "Volatility Surface Analysis": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Quote Provided": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Exercise Decision": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Transparency Assessment": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Premium Calculation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Strategy Validation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Quote Requested": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Position Reconciliation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Reconciliation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Premium Settlement": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Collateral Management": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Risk Assessment": [
-    "trading_strategy",
     "client_type",
-    "option_type",
-    "risk_score",
-    "currency_pair",
     "booking_system",
-    "limit_usage"
+    "limit_usage",
+    "option_type",
+    "trading_strategy",
+    "risk_score",
+    "currency_pair"
   ],
   "Best Execution Validation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Credit Check": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Greeks Calculation": [
-    "gamma",
-    "trading_strategy",
     "client_type",
-    "option_type",
-    "delta",
-    "currency_pair",
+    "booking_system",
+    "gamma",
     "vega",
+    "option_type",
+    "trading_strategy",
     "theta",
-    "booking_system"
+    "currency_pair",
+    "delta"
   ],
   "Client Limit Validation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Allocation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Initial Margin Calculation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Validation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Regulatory Reporting Generation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Settlement Instructions": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Matching": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "ISDA Master Agreement Check": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Final Settlement": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "KYC Refresh Check": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Trade Confirmation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Transaction Reporting Check": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "CSA Verification": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ],
   "Market Data Validation": [
-    "trading_strategy",
     "client_type",
+    "booking_system",
     "option_type",
-    "currency_pair",
-    "booking_system"
+    "trading_strategy",
+    "currency_pair"
   ]
 }
 - Number of Unique Cases: 4

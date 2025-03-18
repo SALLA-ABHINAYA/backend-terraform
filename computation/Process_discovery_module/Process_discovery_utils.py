@@ -172,8 +172,8 @@ def process_mining_analysis(csv_path):
         os.makedirs("ocpm_output", exist_ok=True)
 
         # Copy uploaded file to output directory for use by Outlier Analysis
-        output_csv_path = os.path.join("ocpm_output", "event_log.csv")
-        shutil.copy2(csv_path, output_csv_path)
+        # output_csv_path = os.path.join("ocpm_output", "event_log.csv")
+        # shutil.copy2(csv_path, output_csv_path)
 
         # Send the file via API POST request
         # try:  
@@ -205,13 +205,16 @@ def process_mining_analysis(csv_path):
         # Generate visualizations
         pn_gviz = pn_visualizer.apply(petri_net, initial_marking, final_marking)
         pn_visualizer.save(pn_gviz, "output/fx_trade_petri_net.png")
+        pn_visualizer.save(pn_gviz, "api_response/fx_trade_petri_net.png")
 
         pt_gviz = pt_visualizer.apply(process_tree)
         pt_visualizer.save(pt_gviz, "output/fx_trade_process_tree.png")
+        pt_visualizer.save(pt_gviz, "api_response/fx_trade_process_tree.png")
 
         bpmn_graph = pm4py.convert_to_bpmn(process_tree)
         bpmn_gviz = bpmn_visualizer.apply(bpmn_graph)
         bpmn_visualizer.save(bpmn_gviz, "output/fx_trade_bpmn.png")
+        bpmn_visualizer.save(bpmn_gviz, "api_response/fx_trade_bpmn.png")
 
         return bpmn_graph, event_log
 

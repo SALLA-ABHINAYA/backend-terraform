@@ -15,11 +15,17 @@
       "booking_system",
       "client_type",
       "currency_pair",
+      "delta",
+      "gamma",
+      "limit_usage",
       "notional_amount",
       "option_type",
       "premium",
+      "risk_score",
       "strike_price",
-      "trading_strategy"
+      "theta",
+      "trading_strategy",
+      "vega"
     ],
     "relationships": [
       "Client",
@@ -64,15 +70,16 @@
       "Risk Transfer Executed"
     ],
     "attributes": [
+      "booking_system",
       "client_type",
       "currency_pair",
       "limit_usage",
+      "option_type",
       "risk_score",
       "trading_strategy"
     ],
     "relationships": [
       "Client",
-      "MarketData",
       "Trade"
     ]
   },
@@ -100,7 +107,6 @@
     ],
     "relationships": [
       "Order",
-      "Position",
       "Trade"
     ]
   },
@@ -109,7 +115,8 @@
     "activities": [
       "Credit Check",
       "Settlement Instructions",
-      "Premium Settlement"
+      "Premium Settlement",
+      "KYC Refresh Check"
     ],
     "attributes": [
       "booking_system",

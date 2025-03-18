@@ -531,8 +531,8 @@ def process_log_file(df: pd.DataFrame, chunk_size=1000):
             return {}
 
         # Save the merged results directly - they're already in the correct format
-        output_path = 'ocpm_output/output_ocel.json'
-        os.makedirs('ocpm_output', exist_ok=True)
+        output_path = 'api_response/output_ocel.json'
+        os.makedirs('api_response', exist_ok=True)
 
         api_response="api_response/output_ocel.json"
 

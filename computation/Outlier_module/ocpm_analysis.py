@@ -12,7 +12,7 @@ import os
 import json
 import requests
 
-from .azure_processor import process_log_file
+from computation.Outlier_module.azure_processor import process_log_file
 from utils import get_azure_openai_client
 
 # Add this at the start of your script, before any other imports
@@ -101,7 +101,7 @@ class OCPMAnalyzer:
 
 
 
-    def save_ocel(self, output_path: str = "ocpm_output/process_data.json") -> str:
+    def save_ocel(self) -> str:
         """Save OCPM data in OCEL format."""
         import json
         from pathlib import Path
@@ -118,15 +118,16 @@ class OCPMAnalyzer:
             logger.debug("Top-level keys: %s", list(ocel_data.keys()))
             logger.debug("Number of events: %d", len(ocel_data.get('ocel:events', [])))
 
+            # Define output path
+            output_path = Path("ocpm_output/process_data.json")
+            api_response_path = Path("api_response/process_data.json")
+
             # Create output directory if needed
-            output_path = Path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Save OCEL file
-            api_response_path="api_response/process_data.json"
             with open(output_path, 'w', encoding='utf-8') as f:
                 json.dump(ocel_data, f, indent=2, ensure_ascii=False)
-
             with open(api_response_path, 'w', encoding='utf-8') as f:
                 json.dump(ocel_data, f, indent=2, ensure_ascii=False)
 
@@ -213,7 +214,7 @@ class OCPMAnalyzer:
         """
         try:
             # First load the existing OCEL model
-            with open('ocpm_output/output_ocel.json', 'r') as f:
+            with open('api_response/output_ocel.json', 'r') as f:
                 ocel_model = json.load(f)
 
             # Initialize OpenAI client
@@ -276,6 +277,7 @@ class OCPMAnalyzer:
                     raise ValueError(f"Missing required keys in threshold config for {obj_type}")
 
             # Save the thresholds
+            os.makedirs('api_response', exist_ok=True)
             api_response="api_response/output_ocel_threshold.json"
             with open(api_response, 'w') as f:
                 json.dump(thresholds, f, indent=2)

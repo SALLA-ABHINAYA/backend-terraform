@@ -45,7 +45,7 @@ class OCELEnhancedFMEA:
             self.ocel_data = ocel_data
 
             # Initialize OCEL data manager for relationship/attribute management
-            self.data_manager = OCELDataManager("ocpm_output/process_data.json")
+            self.data_manager = OCELDataManager("api_response/process_data.json")
 
             # Validate OCEL data structure
             if not isinstance(ocel_data, dict):
@@ -136,7 +136,7 @@ class OCELEnhancedFMEA:
             }
 
             # Generate or load FMEA settings
-            fmea_settings_path = 'ocpm_output/fmea_settings.json'
+            fmea_settings_path = 'api_response/fmea_settings.json'
             if not os.path.exists(fmea_settings_path):
                 logger.info("Generating new FMEA settings...")
                 self.fmea_settings = self._generate_fmea_settings()
@@ -156,7 +156,7 @@ class OCELEnhancedFMEA:
         """Generate FMEA settings using Azure OpenAI based on OCEL model"""
         try:
             # Load OCEL model
-            with open('ocpm_output/output_ocel.json', 'r') as f:
+            with open('api_response/output_ocel.json', 'r') as f:
                 ocel_model = json.load(f)
 
             # Create context for OpenAI
@@ -241,19 +241,19 @@ class OCELEnhancedFMEA:
             settings = json.loads(response.choices[0].message.content)
 
             # Save settings
-            output_path = os.path.join('ocpm_output', 'fmea_settings.json')
+            output_path = os.path.join('api_response', 'fmea_settings.json')
             with open(output_path, 'w') as f:
                 json.dump(obj=settings, fp=f, indent=2)
 
             # Send settings to API endpoint via POST request
-            try:
-                response = requests.post("http://127.0.0.1:8000/fmea_settings", json=settings)
-                if response.status_code == 200:
-                    logger.info("FMEA settings successfully sent to API endpoint")
-                else:
-                    logger.error(f"Failed to send FMEA settings to API endpoint: {response.status_code} - {response.text}")
-            except requests.exceptions.RequestException as e:
-                logger.error(f"Error sending FMEA settings to API endpoint: {str(e)}")
+            # try:
+            #     response = requests.post("http://127.0.0.1:8000/fmea_settings", json=settings)
+            #     if response.status_code == 200:
+            #         logger.info("FMEA settings successfully sent to API endpoint")
+            #     else:
+            #         logger.error(f"Failed to send FMEA settings to API endpoint: {response.status_code} - {response.text}")
+            # except requests.exceptions.RequestException as e:
+            #     logger.error(f"Error sending FMEA settings to API endpoint: {str(e)}")
 
             logger.info(f"Generated FMEA settings saved to {output_path}")
             return settings
@@ -267,7 +267,7 @@ class OCELEnhancedFMEA:
     def _initialize_timing_thresholds(self) -> Dict[str, Dict]:
         """Initialize timing thresholds from OCEL threshold file"""
         try:
-            with open('ocpm_output/output_ocel_threshold.json', 'r') as f:
+            with open('api_response/output_ocel_threshold.json', 'r') as f:
                 thresholds = json.load(f)
             logger.info("Loaded timing thresholds from file")
             return thresholds

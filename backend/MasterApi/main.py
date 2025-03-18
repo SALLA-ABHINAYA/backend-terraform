@@ -36,9 +36,19 @@ from fastapi import File, UploadFile
 
 from fastapi import FastAPI
 from backend.MasterApi.routes import router
+from backend.MasterApi.Routers.Process_discovery_router import pd_router
+from backend.MasterApi.Routers.Outlier_module_router import out_router
+from backend.MasterApi.Routers.gap_analysis_module import gap_router
+from backend.MasterApi.Routers.FMEA_analysis_module import fmea_router
+
 
 app = FastAPI()
 app.include_router(router)
+app.include_router(pd_router)
+app.include_router(out_router)
+app.include_router(gap_router)
+app.include_router(fmea_router)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,6 +73,21 @@ async def page1(request: Request):
 
 
 
+## Funtion to ensure that the folder is cleared before the server starts
+# def clear_folder(folder_path: str):
+#     for filename in os.listdir(folder_path):
+#         file_path = os.path.join(folder_path, filename)
+#         try:
+#             if os.path.isfile(file_path) or os.path.islink(file_path):
+#                 os.unlink(file_path)
+#             elif os.path.isdir(file_path):
+#                 os.rmdir(file_path)
+#         except Exception as e:
+#             logger.error(f'Failed to delete {file_path}. Reason: {e}')
 
-
+# @app.on_event("startup")
+# async def startup_event():
+#     folder_path = "api_response"
+#     clear_folder(folder_path)
+#     logger.info('Folder contents cleared successfully')
 
