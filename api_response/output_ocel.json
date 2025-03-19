@@ -9,10 +9,12 @@
       "Trade Matching",
       "Trade Reconciliation",
       "Final Settlement",
-      "Trade Transparency Assessment"
+      "Trade Transparency Assessment",
+      "Trade Allocation"
     ],
     "attributes": [
       "booking_system",
+      "case_id",
       "client_type",
       "currency_pair",
       "delta",
@@ -39,16 +41,16 @@
     "activities": [
       "Quote Requested",
       "Quote Provided",
+      "Exercise Decision",
+      "Best Execution Validation",
       "Client Limit Validation",
-      "Strategy Validation",
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
-      "Best Execution Validation",
-      "Exercise Decision",
-      "Trade Allocation"
+      "Strategy Validation"
     ],
     "attributes": [
       "booking_system",
+      "case_id",
       "client_type",
       "currency_pair",
       "option_type",
@@ -66,11 +68,11 @@
       "Position Reconciliation",
       "Risk Assessment",
       "Initial Margin Calculation",
-      "Collateral Management",
-      "Risk Transfer Executed"
+      "Collateral Management"
     ],
     "attributes": [
       "booking_system",
+      "case_id",
       "client_type",
       "currency_pair",
       "limit_usage",
@@ -96,6 +98,7 @@
     ],
     "attributes": [
       "booking_system",
+      "case_id",
       "client_type",
       "currency_pair",
       "delta",
@@ -115,11 +118,11 @@
     "activities": [
       "Credit Check",
       "Settlement Instructions",
-      "Premium Settlement",
-      "KYC Refresh Check"
+      "Premium Settlement"
     ],
     "attributes": [
       "booking_system",
+      "case_id",
       "client_type",
       "currency_pair",
       "trading_strategy"

@@ -23,6 +23,11 @@ from computation.Process_discovery_module.Process_discovery_utils import process
 
 #  import pm4py
 import pm4py
+import tempfile
+import os
+import xml.dom.minidom
+from fastapi import HTTPException, Response
+import pm4py
 from fastapi import APIRouter
 import pandas as pd
 import numpy as np
@@ -44,6 +49,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+from backend.models.pydantic_models import CSVResponse
+from backend.models.pydantic_models import BPMNResponse
+from backend.models.pydantic_models import ImageResponse
+
+
+from backend.utils.helpers import extract_json_schema
+from backend.utils.helpers import convert_timestamps
+
+
+
 pd_router = APIRouter(prefix="/process-discovery", tags=["Process Discovery"])
 
 # Create the directory when the server is initiated
@@ -56,74 +71,61 @@ if not os.path.exists("api_response"):
 async def read_root(request: Request):
     return {"message": "Welcome to the Process Discovery Module"}
 
-@pd_router.post("/upload")
+@pd_router.post("/upload", response_model=CSVResponse)
 async def upload_csv(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed")
-
+    
     content = await file.read()
-    df = pd.read_csv(io.StringIO(content.decode("utf-8")))
-
+    try:
+        df = pd.read_csv(io.StringIO(content.decode("utf-8")))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing CSV: {str(e)}")
+    
     # Save the file to the api_response folder
+    os.makedirs("api_response", exist_ok=True)
     save_path = os.path.join("api_response", "data_event_log.csv")
     with open(save_path, "wb") as f:
         f.write(content)
-
-    # Example: Print CSV content (replace with processing logic)
-    # print(df.head())
-
-    return {"message": f"Successfully uploaded {file.filename}", "data": df.head().to_dict()}
+    
+    return CSVResponse(message=f"Successfully uploaded {file.filename}", data=df.head().to_dict(orient="records"))
 
 
-import tempfile
-import os
-import xml.dom.minidom
-from fastapi import HTTPException, Response
-import pm4py
 
-@pd_router.get("/calculate_bpmn")
+
+
+@pd_router.get("/calculate_bpmn", response_model=BPMNResponse)
 async def calculate():
     try:
+        file_path = os.path.join("api_response", "data_event_log.csv")
+        
         try:
-            file_path = os.path.join("api_response", "data_event_log.csv")
             bpmn_graph, event_log = process_mining_analysis(file_path)
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail="Data file not found")
         
-        # Create a temporary file to write the BPMN XML
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".bpmn")
         temp_file.close()
         
-
-        # Write the BPMN graph to the temporary file
         pm4py.write_bpmn(bpmn_graph, temp_file.name)
         
-        # Read the XML content
         with open(temp_file.name, 'r') as f:
             bpmn_xml_raw = f.read()
         
-        # Pretty print the XML
         dom = xml.dom.minidom.parseString(bpmn_xml_raw)
         pretty_xml = dom.toprettyxml(indent="  ")
-
-        # Remove the temporary file
+        
         os.unlink(temp_file.name)
         
-        # Return either as JSON with the XML as a string
-        return {
-            "success": True,
-            "status_code": 200,
-            "message": "Successfully generated BPMN XML",
-            "bpmn_xml": pretty_xml,
-        }
-        
-        # Alternatively, return as a proper XML response:
-        # return Response(
-        #     content=pretty_xml,
-        #     media_type="application/xml"
-        # )
+        return BPMNResponse(
+            success=True,
+            status_code=200,
+            message="Successfully generated BPMN XML",
+            bpmn_xml=pretty_xml
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred during process mining analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
 
 def check_fx_trade_process_tree_exists():
     file_path = os.path.join("api_response", "fx_trade_process_tree.png")
@@ -135,7 +137,7 @@ def check_fx_trade_process_tree_exists():
     else:
         return {"exists": False, "image": None}
 
-@pd_router.get("/fx_trade_process_tree_display")
+@pd_router.get("/fx_trade_process_tree_display",response_model=ImageResponse)
 async def fx_trade_process_tree_display(process_tree_status: dict = Depends(check_fx_trade_process_tree_exists)):
     try:
         if not process_tree_status["exists"]:
@@ -161,7 +163,7 @@ def check_fx_trade_bpmn_exists():
     else:
         return {"exists": False, "image": None}
 
-@pd_router.get("/fx_trade_bpmn_display")
+@pd_router.get("/fx_trade_bpmn_display",response_model=ImageResponse)
 async def fx_trade_bpmn_display(bpmn_status: dict = Depends(check_fx_trade_bpmn_exists)):
     try:
         if not bpmn_status["exists"]:
@@ -172,6 +174,31 @@ async def fx_trade_bpmn_display(bpmn_status: dict = Depends(check_fx_trade_bpmn_
             "status_code": 200,
             "message": "Successfully retrieved BPMN image",
             "image": bpmn_status["image"],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+def check_fx_trade_petri_net_exists():
+    file_path = os.path.join("api_response", "fx_trade_petri_net.png")
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            image_content = f.read()
+        base64_image = base64.b64encode(image_content).decode("utf-8")
+        return {"exists": True, "image": base64_image}
+    else:
+        return {"exists": False, "image": None}
+
+@pd_router.get("/fx_trade_petri_net_display",response_model=ImageResponse)
+async def fx_trade_bpmn_display(petri_net_status: dict = Depends(check_fx_trade_petri_net_exists)):
+    try:
+        if not petri_net_status["exists"]:
+            raise HTTPException(status_code=404, detail="BPMN image not found")
+
+        return {
+            "success": True,
+            "status_code": 200,
+            "message": "Successfully retrieved BPMN image",
+            "image": petri_net_status["image"],
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

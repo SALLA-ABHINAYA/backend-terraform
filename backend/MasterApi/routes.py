@@ -10,9 +10,39 @@ from computation.Process_discovery_module.Process_discovery_utils import show_lo
 from computation.Process_discovery_module.Process_discovery_utils import hide_loader
 from computation.Process_discovery_module.Process_discovery_utils import process_mining_analysis
 
+from computation.Outlier_module.Outlier_Analysis_utils import get_object_interactions, get_object_metrics, get_object_lifecycle_graph
+from computation.Outlier_module.IntegratedAPAAnalyzer import IntegratedAPAAnalyzer
+
+# import the OCELFailureMode class from the OCELFailure.py file
+from computation.FMEA_module.OCELFailure import OCELFailureMode
+# import the fmea_utils.py file
+from computation.FMEA_module.fmea_utils import get_fmea_insights, display_rpn_distribution, display_fmea_analysis
+# import the OCELDataManager class from the OCELDataManager.py file
+from computation.FMEA_module.OCELDataManager import OCELDataManager
+# import the OCELEnhancedFMEA class from the OCELEnhancedFMEA.py file
+from computation.FMEA_module.OCELEnhancedFMEA import OCELEnhancedFMEA
+
+
+
+from backend.utils.helpers import extract_json_schema
+from backend.utils.helpers import convert_timestamps
+
+
+from backend.models.pydantic_models import CSVResponse
+from backend.models.pydantic_models import BPMNResponse
+from backend.models.pydantic_models import ImageResponse
+from backend.models.pydantic_models import  InteractionsResponse
+from backend.models.pydantic_models import MetricModel
+from backend.models.pydantic_models import LifecycleModel
+from backend.models.pydantic_models import AIAnalysisResponse
+from backend.models.pydantic_models import DataModel
+from backend.models.pydantic_models import FMEAAnalysisResponse
+from backend.models.pydantic_models import RPNDistributionPlot
+
 #  import pm4py
 import pm4py
 from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,88 +51,120 @@ import base64
 import tempfile
 import os
 from fastapi import HTTPException
+from typing import Dict
 import pm4py
-
 import logging
 from fastapi import Depends
+from pydantic import BaseModel,RootModel,Field
+from typing import List
+import tempfile
+from utils import get_azure_openai_client
+import os
+import xml.dom.minidom
+from fastapi import HTTPException, Response
+import pm4py
+import logging
+from fastapi import APIRouter, HTTPException
+from fastapi.encoders import jsonable_encoder
+import os
+import traceback
+from collections import defaultdict
+import json
+import plotly.utils
+import numpy as np
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
+from typing import Dict, List, Any, Set
+import json
+import logging
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+
+import tornado   # Required for Streamlit sharing
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+from typing import List
 logger = logging.getLogger(__name__)
 
 
 router = APIRouter()
 
-@router.post("/upload")
+
+
+# Pydantic model for CSV 
+
+
+@router.post("/upload", response_model=CSVResponse)
 async def upload_csv(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed")
-
+    
     content = await file.read()
-    df = pd.read_csv(io.StringIO(content.decode("utf-8")))
-
+    try:
+        df = pd.read_csv(io.StringIO(content.decode("utf-8")))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing CSV: {str(e)}")
+    
     # Save the file to the api_response folder
+    os.makedirs("api_response", exist_ok=True)
     save_path = os.path.join("api_response", "data_event_log.csv")
     with open(save_path, "wb") as f:
         f.write(content)
-
-    # Example: Print CSV content (replace with processing logic)
-    # print(df.head())
-
-    return {"message": f"Successfully uploaded {file.filename}", "data": df.head().to_dict()}
+    
+    return CSVResponse(message=f"Successfully uploaded {file.filename}", data=df.head().to_dict(orient="records"))
 
 
-import tempfile
-import os
-import xml.dom.minidom
-from fastapi import HTTPException, Response
-import pm4py
 
-@router.get("/calculate_bpmn")
+
+
+
+
+
+
+@router.get("/calculate_bpmn", response_model=BPMNResponse)
 async def calculate():
     try:
+        file_path = os.path.join("api_response", "data_event_log.csv")
+        
         try:
-            file_path = os.path.join("api_response", "data_event_log.csv")
             bpmn_graph, event_log = process_mining_analysis(file_path)
         except FileNotFoundError:
             raise HTTPException(status_code=404, detail="Data file not found")
         
-        # Create a temporary file to write the BPMN XML
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".bpmn")
         temp_file.close()
         
-
-        # Write the BPMN graph to the temporary file
         pm4py.write_bpmn(bpmn_graph, temp_file.name)
         
-        # Read the XML content
         with open(temp_file.name, 'r') as f:
             bpmn_xml_raw = f.read()
         
-        # Pretty print the XML
         dom = xml.dom.minidom.parseString(bpmn_xml_raw)
         pretty_xml = dom.toprettyxml(indent="  ")
-
-        # Remove the temporary file
+        
         os.unlink(temp_file.name)
         
-        # Return either as JSON with the XML as a string
-        return {
-            "success": True,
-            "status_code": 200,
-            "message": "Successfully generated BPMN XML",
-            "bpmn_xml": pretty_xml,
-        }
-        
-        # Alternatively, return as a proper XML response:
-        # return Response(
-        #     content=pretty_xml,
-        #     media_type="application/xml"
-        # )
+        return BPMNResponse(
+            success=True,
+            status_code=200,
+            message="Successfully generated BPMN XML",
+            bpmn_xml=pretty_xml
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred during process mining analysis: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+
+
+
+
+
 
 def check_fx_trade_process_tree_exists():
     file_path = os.path.join("api_response", "fx_trade_process_tree.png")
@@ -114,7 +176,7 @@ def check_fx_trade_process_tree_exists():
     else:
         return {"exists": False, "image": None}
 
-@router.get("/fx_trade_process_tree_display")
+@router.get("/fx_trade_process_tree_display",response_model=ImageResponse)
 async def fx_trade_process_tree_display(process_tree_status: dict = Depends(check_fx_trade_process_tree_exists)):
     try:
         if not process_tree_status["exists"]:
@@ -140,7 +202,7 @@ def check_fx_trade_bpmn_exists():
     else:
         return {"exists": False, "image": None}
 
-@router.get("/fx_trade_bpmn_display")
+@router.get("/fx_trade_bpmn_display",response_model=ImageResponse)
 async def fx_trade_bpmn_display(bpmn_status: dict = Depends(check_fx_trade_bpmn_exists)):
     try:
         if not bpmn_status["exists"]:
@@ -151,6 +213,31 @@ async def fx_trade_bpmn_display(bpmn_status: dict = Depends(check_fx_trade_bpmn_
             "status_code": 200,
             "message": "Successfully retrieved BPMN image",
             "image": bpmn_status["image"],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+def check_fx_trade_petri_net_exists():
+    file_path = os.path.join("api_response", "fx_trade_petri_net.png")
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            image_content = f.read()
+        base64_image = base64.b64encode(image_content).decode("utf-8")
+        return {"exists": True, "image": base64_image}
+    else:
+        return {"exists": False, "image": None}
+
+@router.get("/fx_trade_petri_net_display",response_model=ImageResponse)
+async def fx_trade_bpmn_display(petri_net_status: dict = Depends(check_fx_trade_petri_net_exists)):
+    try:
+        if not petri_net_status["exists"]:
+            raise HTTPException(status_code=404, detail="BPMN image not found")
+
+        return {
+            "success": True,
+            "status_code": 200,
+            "message": "Successfully retrieved BPMN image",
+            "image": petri_net_status["image"],
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
@@ -174,18 +261,18 @@ async def download_csv():
 
 
 ## for the OUTLIER MODULE
-from computation.Outlier_module.Outlier_Analysis_utils import get_object_interactions, get_object_metrics, get_object_lifecycle_graph
 
 
 
-import logging
-from fastapi import APIRouter, HTTPException
-from fastapi.encoders import jsonable_encoder
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+
+
+
+
+
 
 ## routing for ocpm ui
-@router.get("/interactions")
+@router.get("/interactions",response_model=InteractionsResponse)
 async def object_interactions():
     """API endpoint for object type interactions."""
     try:
@@ -211,7 +298,9 @@ async def object_interactions():
                     interaction = {"key": str(key), "count": value}
                 interactions_list.append(interaction)
 
-        print(f"Interactions list: {interactions_list}")
+        # print(f"Interactions list: {interactions_list}")
+        print('starting')
+        print(extract_json_schema(interactions_list))
         
         return {"interactions": interactions_list}
     except Exception as e:
@@ -220,7 +309,11 @@ async def object_interactions():
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/metrics")
+
+
+
+
+@router.get("/metrics",response_model=MetricModel)
 def object_metrics():
             """API endpoint for object type metrics."""
             try:
@@ -229,7 +322,12 @@ def object_metrics():
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/lifecycle/{object_type}")
+
+
+
+
+
+@router.get("/lifecycle/{object_type}",response_model=LifecycleModel)
 def object_lifecycle(object_type: str):
             """API endpoint for object lifecycle graph."""
             try:
@@ -241,10 +339,13 @@ def object_lifecycle(object_type: str):
 
 ## OUTLIAER ANALYSIS MODULE AI INSIGHTS
 
-from computation.Outlier_module.IntegratedAPAAnalyzer import IntegratedAPAAnalyzer
-from fastapi.responses import JSONResponse
 
-@router.get('/run_ai_analysis')
+
+
+
+
+
+@router.get('/run_ai_analysis',response_model=AIAnalysisResponse)
 def run_ai_analysis():
     ocel_path = os.path.join("api_response", "process_data.json")
     if not os.path.exists(ocel_path):
@@ -278,7 +379,9 @@ def run_ai_analysis():
 
 
 
-@router.get('/get_visualization_data')
+
+
+@router.get('/get_visualization_data',response_model=DataModel)
 def get_visualization_data():
     """Retrieve data for process visualizations."""
     ocel_path = os.path.join("api_response", "process_data.json")
@@ -294,8 +397,7 @@ def get_visualization_data():
         print(f"Type of figures: {type(figures)}")
         
         # Convert Plotly figures to JSON using plotly's built-in serialization
-        import json
-        import plotly.utils
+
         
         # Convert Plotly figures to JSON-serializable format
         visualization_data = {
@@ -310,31 +412,6 @@ def get_visualization_data():
         error_details = traceback.format_exc()
         print(f"Error details: {error_details}")
         return JSONResponse(content={"error": f"Error generating visualization data: {str(e)}"}, status_code=500)
-
-# How This Works:
-# ✅ Extracts visualization data instead of rendering plots.
-# ✅ Converts Plotly figures to JSON format (to_dict()).
-# ✅ Frontend team can reconstruct plots using Plotly in JavaScript.
-
-# Frontend Usage Example (JavaScript with Plotly.js):
-# Once the frontend receives the JSON response, they can use it like this:
-
-# javascript
-# Copy
-# Edit
-# fetch("http://localhost:5000/get_visualization_data", {
-#     method: "POST",
-#     headers: { "Content-Type": "application/json" },
-#     body: JSON.stringify({ ocel_path: "path/to/ocel.json" }),
-# })
-# .then(response => response.json())
-# .then(data => {
-#     Plotly.newPlot('activityChart', data.activity_distribution.data, data.activity_distribution.layout);
-#     Plotly.newPlot('resourceChart', data.resource_distribution.data, data.resource_distribution.layout);
-# })
-# .catch(error => console.error("Error fetching visualization data:", error));
-
-
 
 
 
@@ -422,35 +499,11 @@ async def handle_graph_analytics():
 
 # FMEA ANALYSIS MODULE
 # pages/5_FMEA_Analysis.py
-import os
-import traceback
-from collections import defaultdict
 
-import numpy as np
-import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-from typing import Dict, List, Any, Set
-import json
-import logging
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
 
-import tornado   # Required for Streamlit sharing
 
-# import the OCELFailureMode class from the OCELFailure.py file
-from computation.FMEA_module.OCELFailure import OCELFailureMode
 
-# import the fmea_utils.py file
-from computation.FMEA_module.fmea_utils import get_fmea_insights, display_rpn_distribution, display_fmea_analysis
 
-# import the OCELDataManager class from the OCELDataManager.py file
-from computation.FMEA_module.OCELDataManager import OCELDataManager
-
-# import the OCELEnhancedFMEA class from the OCELEnhancedFMEA.py file
-from computation.FMEA_module.OCELEnhancedFMEA import OCELEnhancedFMEA
-
-from utils import get_azure_openai_client
 
 def convert_timestamps(obj):
     if isinstance(obj, pd.Timestamp):
@@ -458,7 +511,14 @@ def convert_timestamps(obj):
     raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 
-@router.get("/fmea-analysis")
+
+
+
+
+
+
+
+@router.get("/fmea-analysis",response_model=FMEAAnalysisResponse)
 def perform_fmea_analysis():
     try:
         # Verify OCEL model file exists
@@ -515,7 +575,7 @@ def perform_fmea_analysis():
 
 
 
-@router.get("/rpn_distribution")
+@router.get("/rpn_distribution",response_model=RPNDistributionPlot)
 async def display_rpn_distribution():
     """
     Display comprehensive RPN distribution visualization with analysis breakdowns.

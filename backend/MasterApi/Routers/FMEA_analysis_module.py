@@ -10,6 +10,13 @@ from computation.FMEA_module.fmea_utils import get_fmea_insights
 from computation.FMEA_module.OCELEnhancedFMEA import OCELEnhancedFMEA
 import plotly.graph_objects as go
 
+from backend.models.pydantic_models import FMEAAnalysisResponse
+from backend.models.pydantic_models import RPNDistributionPlot
+
+
+from backend.utils.helpers import extract_json_schema
+from backend.utils.helpers import convert_timestamps
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -34,29 +41,39 @@ def convert_timestamps(obj):
         return obj.isoformat()  # Convert to ISO 8601 format
     raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
-@fmea_router.get("/fmea-analysis")
+@fmea_router.get("/fmea-analysis",response_model=FMEAAnalysisResponse)
 def perform_fmea_analysis():
     try:
+        # Verify OCEL model file exists
+       # if not os.path.exists("api_response/output_ocel.json"): -->comeback if error is found
         if not os.path.exists("api_response/process_data.json"):
             raise HTTPException(status_code=400, detail="OCEL model file not found. Run Outlier Analysis first.")
         
+        # Load process data
         with open("api_response/process_data.json", "r") as f:
             ocel_data = json.load(f)
         
+        # Validate OCEL data structure
         if "ocel:events" not in ocel_data:
             logger.error("Invalid OCEL data structure")
             raise HTTPException(status_code=400, detail="Invalid OCEL data structure - missing events")
         
+        # Initialize analyzer with validated data
         analyzer = OCELEnhancedFMEA(ocel_data)
-        fmea_results = analyzer.identify_failure_modes()
         
+        # Perform FMEA analysis
+        fmea_results = analyzer.identify_failure_modes()
+        # Save FMEA results to a JSON file
         fmea_results_path = os.path.join("api_response", "fmea_results.json")
         with open(fmea_results_path, "w") as f:
             json.dump(fmea_results, f, indent=4, default=convert_timestamps)
-        
+           # json.dump(fmea_results, f, indent=4)
         logger.info(f"Analysis complete. Found {len(fmea_results)} failure modes")
         
+        # Get AI insights
+        
         ai_insights = get_fmea_insights(fmea_results)
+        # Save AI insights to a JSON file
         ai_insights_path = os.path.join("api_response", "ai_insights.json")
         with open(ai_insights_path, "w") as f:
             json.dump(ai_insights, f, indent=4)
@@ -78,9 +95,15 @@ def perform_fmea_analysis():
         logger.error(f"Unexpected error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@fmea_router.get("/rpn_distribution")
+@fmea_router.get("/rpn_distribution",response_model=RPNDistributionPlot)
 async def display_rpn_distribution():
+    """
+    Display comprehensive RPN distribution visualization with analysis breakdowns.
+    This shows the spread of risk levels across different failure modes and helps
+    identify risk clusters and patterns.
+    """
     try:
+        # Load FMEA results from a JSON file
         fmea_results_path = os.path.join("api_response", "fmea_results.json")
         if not os.path.exists(fmea_results_path):
             raise HTTPException(status_code=404, detail="FMEA results file not found")
@@ -88,9 +111,11 @@ async def display_rpn_distribution():
         with open(fmea_results_path, "r") as f:
             fmea_results = json.load(f)
 
+        # Create base RPN histogram
         df = pd.DataFrame(fmea_results)
         fig = go.Figure()
 
+        # Add main RPN distribution histogram
         fig.add_trace(go.Histogram(
             x=df['rpn'],
             nbinsx=20,
@@ -99,6 +124,7 @@ async def display_rpn_distribution():
             opacity=0.7
         ))
 
+        # Add critical threshold line
         fig.add_vline(
             x=200,
             line_dash="dash",
@@ -107,6 +133,7 @@ async def display_rpn_distribution():
             annotation_position="top right"
         )
 
+        # Add risk zone annotations
         fig.add_vrect(
             x0=0, x1=100,
             fillcolor="green", opacity=0.1,
@@ -129,6 +156,7 @@ async def display_rpn_distribution():
             annotation_position="bottom"
         )
 
+        # Update layout with detailed information
         fig.update_layout(
             title={
                 'text': 'Risk Priority Number (RPN) Distribution',
@@ -166,6 +194,7 @@ async def display_rpn_distribution():
             ]
         )
 
+        # Calculate distribution statistics
         stats = {
             "average_rpn": df['rpn'].mean(),
             "median_rpn": df['rpn'].median(),
@@ -173,12 +202,14 @@ async def display_rpn_distribution():
             "90th_percentile": df['rpn'].quantile(0.9)
         }
 
+        # Risk zone analysis
         risk_zones = {
             'Low Risk (RPN ≤ 100)': len(df[df['rpn'] <= 100]),
             'Medium Risk (100 < RPN ≤ 200)': len(df[(df['rpn'] > 100) & (df['rpn'] <= 200)]),
             'High Risk (RPN > 200)': len(df[df['rpn'] > 200])
         }
 
+        # Create risk zone bar chart
         risk_fig = go.Figure(data=[
             go.Bar(
                 x=list(risk_zones.keys()),

@@ -13,6 +13,7 @@ from tornado.websocket import WebSocketClosedError
 from fastapi.responses import FileResponse
 from fastapi import File, UploadFile
 
+
 #  import pm4py
 import pm4py
 from fastapi import APIRouter
@@ -27,6 +28,10 @@ from fastapi import HTTPException
 import pm4py
 
 import logging
+from fastapi import APIRouter, HTTPException
+from fastapi.encoders import jsonable_encoder
+import json
+import plotly
 from fastapi import Depends
 # Configure logging
 logging.basicConfig(
@@ -40,9 +45,31 @@ from computation.Outlier_module.Outlier_Analysis_utils import get_object_interac
 import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+from typing import Dict, List, Any
 
 from computation.Outlier_module.Outlier_Analysis_utils import get_object_interactions, get_object_metrics, get_object_lifecycle_graph
 
+
+from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_failure_patterns
+from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_time_analysis
+from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_resource_analysis
+from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_case_analysis_patterns
+
+from backend.models.pydantic_models import  InteractionsResponse
+from backend.models.pydantic_models import MetricModel
+from backend.models.pydantic_models import LifecycleModel
+from backend.models.pydantic_models import AIAnalysisResponse
+from backend.models.pydantic_models import DataModel
+from backend.models.pydantic_models import ResourceAnalysis
+from backend.models.pydantic_models import FailureLogic
+from backend.models.pydantic_models import CaseAnalysisDocument
+
+
+from backend.utils.helpers import extract_json_schema
+from backend.utils.helpers import convert_timestamps
 
 
 out_router = APIRouter(prefix="/outlier-analysis", tags=["Outlier Analysis"])
@@ -60,7 +87,7 @@ async def read_root(request: Request):
 
 
 ## routing for ocpm ui
-@out_router.get("/interactions")
+@out_router.get("/interactions",response_model=InteractionsResponse)
 async def object_interactions():
     """API endpoint for object type interactions."""
     try:
@@ -86,7 +113,9 @@ async def object_interactions():
                     interaction = {"key": str(key), "count": value}
                 interactions_list.append(interaction)
 
-        print(f"Interactions list: {interactions_list}")
+        # print(f"Interactions list: {interactions_list}")
+        print('starting')
+        print(extract_json_schema(interactions_list))
         
         return {"interactions": interactions_list}
     except Exception as e:
@@ -95,31 +124,36 @@ async def object_interactions():
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
-@out_router.get("/metrics")
+@out_router.get("/metrics",response_model=MetricModel)
 def object_metrics():
-    """API endpoint for object type metrics."""
-    try:
-        metrics = get_object_metrics()
-        return {"metrics": metrics}  # Return as JSON
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+            """API endpoint for object type metrics."""
+            try:
+                metrics = get_object_metrics()
+                return {"metrics": metrics}  # Return as JSON
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
 
-@out_router.get("/lifecycle/{object_type}")
+
+
+
+
+
+@out_router.get("/lifecycle/{object_type}",response_model=LifecycleModel)
 def object_lifecycle(object_type: str):
-    """API endpoint for object lifecycle graph."""
-    try:
-        lifecycle_graph = get_object_lifecycle_graph(object_type)
-        return {"lifecycle_graph": lifecycle_graph}  # Return as JSON
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+            """API endpoint for object lifecycle graph."""
+            try:
+                lifecycle_graph = get_object_lifecycle_graph(object_type)
+                return {"lifecycle_graph": lifecycle_graph}  # Return as JSON
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
 
 
 ## OUTLIER ANALYSIS MODULE AI INSIGHTS
 
 from computation.Outlier_module.IntegratedAPAAnalyzer import IntegratedAPAAnalyzer
-from fastapi.responses import JSONResponse
 
-@out_router.get('/run_ai_analysis')
+
+@out_router.get('/run_ai_analysis',response_model=AIAnalysisResponse)
 def run_ai_analysis():
     ocel_path = os.path.join("api_response", "process_data.json")
     if not os.path.exists(ocel_path):
@@ -152,7 +186,9 @@ def run_ai_analysis():
         raise HTTPException(status_code=500, detail=f"An error occurred during AI analysis: {str(e)}")
 
 
-@out_router.get('/get_visualization_data')
+
+
+@out_router.get('/get_visualization_data',response_model=DataModel)
 def get_visualization_data():
     """Retrieve data for process visualizations."""
     ocel_path = os.path.join("api_response", "process_data.json")
@@ -168,8 +204,7 @@ def get_visualization_data():
         print(f"Type of figures: {type(figures)}")
         
         # Convert Plotly figures to JSON using plotly's built-in serialization
-        import json
-        import plotly.utils
+
         
         # Convert Plotly figures to JSON-serializable format
         visualization_data = {
@@ -185,9 +220,10 @@ def get_visualization_data():
         print(f"Error details: {error_details}")
         return JSONResponse(content={"error": f"Error generating visualization data: {str(e)}"}, status_code=500)
 
+
 #craete an end point router for _display_failure_patterns_markdown
 
-from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_failure_patterns
+
 
 import numpy as np
 
@@ -204,23 +240,29 @@ def convert_numpy_types(data):
         return {key: convert_numpy_types(value) for key, value in data.items()}  # Recursively convert dicts
     return data  # Return original if no conversion needed
 
-from fastapi.encoders import jsonable_encoder
-#create an api endpoint for the above function
-@out_router.get('/display_failure_patterns')
-def display_failure_patterns():
+
+
+
+
+
+
+@out_router.get('/display_failure_patterns',response_model=FailureLogic)
+async def display_failure_patterns():
     """Display failure patterns."""
     try:
         markdown_logic = initialize_unfair_ocel_analyzer_with_failure_patterns()
-        return jsonable_encoder(markdown_logic)
+        return (markdown_logic)
       #  return {"markdown": markdown_logic}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 #create an endpoint for time_analysis of the failure patterns
-from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_time_analysis
-from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_resource_analysis
 
-@out_router.get('/resource_analysis')
+
+
+
+
+@out_router.get('/resource_analysis',response_model=ResourceAnalysis)
 def resource_analysis():
     """Resource analysis of failure patterns."""
     try:
@@ -229,7 +271,15 @@ def resource_analysis():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@out_router.get('/time_analysis')
+class TimeDataTimeGap(BaseModel):
+    time_data:Dict
+    time_gaps:List[Dict]
+    markdown:str
+
+class TimeLogic(BaseModel):
+    time_logic:TimeDataTimeGap
+
+@out_router.get('/time_analysis',response_model=TimeLogic)
 def time_analysis():
     """Time analysis of failure patterns."""
     try:
@@ -238,9 +288,12 @@ def time_analysis():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-from computation.Outlier_module.Outlier_Analysis_utils import initialize_unfair_ocel_analyzer_with_case_analysis_patterns
 
-@out_router.get('/case_analysis_patterns')
+
+
+
+
+@out_router.get('/case_analysis_patterns',response_model=CaseAnalysisDocument)
 async def case_analysis_patterns():
     """Case analysis of failure patterns."""
     try:
