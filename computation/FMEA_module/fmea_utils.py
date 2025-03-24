@@ -13,8 +13,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+from backend.MasterApi.Routers.central_log import log_time
+
 def get_fmea_insights(fmea_results: List[Dict]) -> Dict[str, str]:
     """Generate AI insights for FMEA analysis"""
+    start=log_time("get_fmea_insights","START")
     client = get_azure_openai_client()
 
     # Create analysis context
@@ -65,7 +68,7 @@ def get_fmea_insights(fmea_results: List[Dict]) -> Dict[str, str]:
         # Parse response into sections
         content = response.choices[0].message.content
         sections = content.split('\n\n')
-
+        log_time("get_fmea_insights","END",start)
         return {
             'findings': sections[0] if len(sections) > 0 else '',
             'insights': sections[1] if len(sections) > 1 else '',

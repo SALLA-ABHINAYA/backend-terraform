@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 fmea_router = APIRouter(prefix="/fmea-analysis", tags=["FMEA Analysis"])
 
+from .central_log import log_time
 # Create the directory when the server is initiated
 if not os.path.exists("api_response"):
     os.makedirs("api_response")
@@ -44,6 +45,7 @@ def convert_timestamps(obj):
 @fmea_router.get("/fmea-analysis",response_model=FMEAAnalysisResponse)
 def perform_fmea_analysis():
     try:
+        start=log_time("perform_fmea_analysis","START")
         # Verify OCEL model file exists
        # if not os.path.exists("api_response/output_ocel.json"): -->comeback if error is found
         if not os.path.exists("api_response/process_data.json"):
@@ -77,7 +79,7 @@ def perform_fmea_analysis():
         ai_insights_path = os.path.join("api_response", "ai_insights.json")
         with open(ai_insights_path, "w") as f:
             json.dump(ai_insights, f, indent=4)
-        
+        log_time("perform_fmea_analysis","END",start)
         return JSONResponse(content={
             "failure_modes": len(fmea_results),
             "findings": ai_insights.get("findings", "No findings available"),
@@ -103,6 +105,7 @@ async def display_rpn_distribution():
     identify risk clusters and patterns.
     """
     try:
+        log_time("display_rpn_distribution","START")
         # Load FMEA results from a JSON file
         fmea_results_path = os.path.join("api_response", "fmea_results.json")
         if not os.path.exists(fmea_results_path):
@@ -223,7 +226,7 @@ async def display_rpn_distribution():
             yaxis_title="Number of Failure Modes",
             height=400
         )
-
+        log_time("display_rpn_distribution","END")
         return JSONResponse(content={
             "rpn_distribution_plot": json.loads(fig.to_json()),
             "risk_zone_plot": json.loads(risk_fig.to_json()),

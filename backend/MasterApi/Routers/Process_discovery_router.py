@@ -57,7 +57,8 @@ from backend.models.pydantic_models import ImageResponse
 from backend.utils.helpers import extract_json_schema
 from backend.utils.helpers import convert_timestamps
 
-
+import time
+from .central_log import log_time
 
 pd_router = APIRouter(prefix="/process-discovery", tags=["Process Discovery"])
 
@@ -78,6 +79,7 @@ async def upload_csv(file: UploadFile = File(...)):
     
     content = await file.read()
     try:
+        start=log_time("upload_csv", "START")
         df = pd.read_csv(io.StringIO(content.decode("utf-8")))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing CSV: {str(e)}")
@@ -88,6 +90,7 @@ async def upload_csv(file: UploadFile = File(...)):
     with open(save_path, "wb") as f:
         f.write(content)
     
+    log_time("upload_csv", "END",start)
     return CSVResponse(message=f"Successfully uploaded {file.filename}", data=df.head().to_dict(orient="records"))
 
 
@@ -97,6 +100,7 @@ async def upload_csv(file: UploadFile = File(...)):
 @pd_router.get("/calculate_bpmn", response_model=BPMNResponse)
 async def calculate():
     try:
+        start=log_time("calculate", "START")
         file_path = os.path.join("api_response", "data_event_log.csv")
         
         try:
@@ -116,7 +120,7 @@ async def calculate():
         pretty_xml = dom.toprettyxml(indent="  ")
         
         os.unlink(temp_file.name)
-        
+        log_time("calculate", "END",start)
         return BPMNResponse(
             success=True,
             status_code=200,
@@ -140,9 +144,11 @@ def check_fx_trade_process_tree_exists():
 @pd_router.get("/fx_trade_process_tree_display",response_model=ImageResponse)
 async def fx_trade_process_tree_display(process_tree_status: dict = Depends(check_fx_trade_process_tree_exists)):
     try:
+        start=log_time("fx_trade_process_tree_display", "START")
         if not process_tree_status["exists"]:
             raise HTTPException(status_code=404, detail="Process tree image not found")
 
+        log_time("fx_trade_process_tree_display", "END",start)
         return {
             "success": True,
             "status_code": 200,
@@ -166,9 +172,10 @@ def check_fx_trade_bpmn_exists():
 @pd_router.get("/fx_trade_bpmn_display",response_model=ImageResponse)
 async def fx_trade_bpmn_display(bpmn_status: dict = Depends(check_fx_trade_bpmn_exists)):
     try:
+        start=log_time("fx_trade_bpmn_display", "START")
         if not bpmn_status["exists"]:
             raise HTTPException(status_code=404, detail="BPMN image not found")
-
+        log_time("fx_trade_bpmn_display", "END",start)
         return {
             "success": True,
             "status_code": 200,
@@ -191,9 +198,10 @@ def check_fx_trade_petri_net_exists():
 @pd_router.get("/fx_trade_petri_net_display",response_model=ImageResponse)
 async def fx_trade_bpmn_display(petri_net_status: dict = Depends(check_fx_trade_petri_net_exists)):
     try:
+        start=log_time("fx_trade_petri_net_display", "START")
         if not petri_net_status["exists"]:
             raise HTTPException(status_code=404, detail="BPMN image not found")
-
+        log_time("fx_trade_petri_net_display", "END",start)
         return {
             "success": True,
             "status_code": 200,

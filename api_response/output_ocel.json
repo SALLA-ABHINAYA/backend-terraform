@@ -8,8 +8,8 @@
       "Trade Confirmation",
       "Trade Matching",
       "Trade Reconciliation",
-      "Final Settlement",
       "Trade Transparency Assessment",
+      "Final Settlement",
       "Trade Allocation"
     ],
     "attributes": [
@@ -41,20 +41,31 @@
     "activities": [
       "Quote Requested",
       "Quote Provided",
-      "Exercise Decision",
-      "Best Execution Validation",
       "Client Limit Validation",
+      "Best Execution Validation",
       "ISDA Master Agreement Check",
       "KYC Refresh Check",
-      "Strategy Validation"
+      "Exercise Decision",
+      "Strategy Validation",
+      "Trade Allocation",
+      "Settlement Instructions"
     ],
     "attributes": [
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
+      "delta",
+      "gamma",
+      "limit_usage",
+      "notional_amount",
       "option_type",
-      "trading_strategy"
+      "premium",
+      "risk_score",
+      "strike_price",
+      "theta",
+      "trading_strategy",
+      "vega"
     ],
     "relationships": [
       "Client",
@@ -68,20 +79,29 @@
       "Position Reconciliation",
       "Risk Assessment",
       "Initial Margin Calculation",
-      "Collateral Management"
+      "Collateral Management",
+      "Risk Transfer Executed"
     ],
     "attributes": [
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
+      "delta",
+      "gamma",
       "limit_usage",
+      "notional_amount",
       "option_type",
+      "premium",
       "risk_score",
-      "trading_strategy"
+      "strike_price",
+      "theta",
+      "trading_strategy",
+      "vega"
     ],
     "relationships": [
       "Client",
+      "MarketData",
       "Trade"
     ]
   },
@@ -92,6 +112,10 @@
       "Volatility Surface Analysis",
       "Greeks Calculation",
       "Premium Calculation",
+      "Surface Construction",
+      "Skew Calibration",
+      "Volatility Smile Analysis",
+      "Market Making Spread Calculation",
       "CSA Verification",
       "Transaction Reporting Check",
       "Regulatory Reporting Generation"
@@ -103,13 +127,20 @@
       "currency_pair",
       "delta",
       "gamma",
+      "limit_usage",
+      "notional_amount",
       "option_type",
+      "premium",
+      "risk_score",
+      "strike_price",
       "theta",
       "trading_strategy",
       "vega"
     ],
     "relationships": [
+      "Client",
       "Order",
+      "Position",
       "Trade"
     ]
   },
@@ -118,16 +149,33 @@
     "activities": [
       "Credit Check",
       "Settlement Instructions",
-      "Premium Settlement"
+      "Premium Settlement",
+      "Transaction Reporting Check",
+      "Regulatory Reporting Generation",
+      "CSA Verification",
+      "Client Limit Validation",
+      "KYC Refresh Check",
+      "ISDA Master Agreement Check"
     ],
     "attributes": [
       "booking_system",
       "case_id",
       "client_type",
       "currency_pair",
-      "trading_strategy"
+      "delta",
+      "gamma",
+      "limit_usage",
+      "notional_amount",
+      "option_type",
+      "premium",
+      "risk_score",
+      "strike_price",
+      "theta",
+      "trading_strategy",
+      "vega"
     ],
     "relationships": [
+      "MarketData",
       "Order",
       "Position",
       "Trade"

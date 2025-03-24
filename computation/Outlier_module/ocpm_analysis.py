@@ -18,6 +18,8 @@ from utils import get_azure_openai_client
 # Add this at the start of your script, before any other imports
 os.environ["PATH"] += os.pathsep + r"C:\samadhi\technology\Graphviz\bin"
 
+from backend.MasterApi.Routers.central_log import log_time
+
 @dataclass
 class ObjectType:
     """Represents an object type in the OCPM model"""
@@ -408,18 +410,21 @@ class OCPMAnalyzer:
         return pd.DataFrame(ocpm_events)
 
     def analyze_object_interactions(self) -> Dict:
+        start=log_time("analyze_object_interactions","START")
         """Analyze interactions between different object types"""
+        
         interactions = defaultdict(int)
 
         for obj_type, related_objects in self.object_relationships.items():
             for related_obj in related_objects:
                 key = tuple(sorted([obj_type, related_obj]))
                 interactions[key] += 1
-
+        log_time("analyze_object_interactions","END",start)
         return dict(interactions)
 
     def calculate_object_metrics(self) -> Dict:
         """Calculate comprehensive metrics for each object type"""
+        start=log_time("calculate_object_metrics","START")
         metrics = {}
         ocpm_df = self.convert_to_ocpm_format()
 
@@ -436,10 +441,11 @@ class OCPMAnalyzer:
                 'top_activities': obj_data['activity'].value_counts().head(3).to_dict(),
                 'interaction_count': len(self.object_relationships[obj_type])
             }
-
+        log_time("calculate_object_metrics","END",start)
         return metrics
 
     def generate_object_lifecycle_graph(self, object_type: str) -> nx.DiGraph:
+        start=log_time("generate_object_lifecycle_graph","START")
         """Generate lifecycle graph for specific object type"""
         ocpm_df = self.convert_to_ocpm_format()
         obj_data = ocpm_df[ocpm_df['object_type'] == object_type]
@@ -451,7 +457,7 @@ class OCPMAnalyzer:
             activities = group['activity'].tolist()
             for i in range(len(activities) - 1):
                 G.add_edge(activities[i], activities[i + 1])
-
+        log_time("generate_object_lifecycle_graph","END",start)
         return G
 
 

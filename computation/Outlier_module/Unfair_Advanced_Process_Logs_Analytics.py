@@ -17,6 +17,8 @@ import pandas as pd
 from utils import get_azure_openai_client
 from computation.Outlier_module.OCPMProcessValidator import OCPMProcessValidator
 
+from backend.MasterApi.Routers.central_log import log_time
+
 warnings.filterwarnings('ignore')
 
 # Configure logging
@@ -43,6 +45,7 @@ class UnfairOCELAnalyzer:
 
     def __init__(self, ocel_path: str):
         """Initialize analyzer with OCEL file path"""
+        start=log_time("Constructor UnfairOCELAnalyzer","START")
         try:
             logger.info(f"Initializing UnfairOCELAnalyzer with {ocel_path}")
 
@@ -73,6 +76,7 @@ class UnfairOCELAnalyzer:
             self._process_data()
 
             logger.info("UnfairOCELAnalyzer initialization completed successfully")
+            log_time("Constructor UnfairOCELAnalyzer","END",start)
 
         except Exception as e:
             logger.error(f"Error initializing analyzer: {str(e)}")
@@ -94,6 +98,7 @@ class UnfairOCELAnalyzer:
         self.outlier_plots = {}
 
         try:
+            start=log_time("_create_outlier_plots","START")
             # Resource Outlier Plot
             resource_loads = pd.Series({k: len(v) for k, v in self.resource_events.items()})
             fig = go.Figure(data=[
@@ -206,68 +211,17 @@ class UnfairOCELAnalyzer:
                 self.outlier_plots['failure_patterns'] = fig
 
             logger.info("Successfully created outlier plots")
-
+            log_time("_create_outlier_plots","START",start)
         except Exception as e:
             logger.error(f"Error creating outlier plots: {str(e)}")
             logger.error(traceback.format_exc())
 
-    # def _calculate_time_metrics(self):
-    #     """Calculate time-based metrics"""
-    #     return {
-    #         'activity_durations': self.relationships_df.groupby('activity')['timestamp'].agg(
-    #             lambda x: (x.max() - x.min()).total_seconds() / 3600
-    #         )
-    #     }
-
-    # def _calculate_case_metrics(self):
-    #     """Calculate case-based metrics"""
-    #     return {
-    #         'complexity': self.relationships_df.groupby('case_id')['activity'].nunique(),
-    #         'duration': self.relationships_df.groupby('case_id')['timestamp'].agg(
-    #             lambda x: (x.max() - x.min()).total_seconds() / 3600
-    #         )
-    #     }
-
-    # def _calculate_handover_metrics(self):
-    #     """Calculate handover metrics between resources"""
-    #     return {
-    #         'handovers': self.relationships_df.groupby('case_id')['resource'].agg(list).apply(
-    #             lambda x: len([i for i in range(len(x) - 1) if x[i] != x[i + 1]])
-    #         )
-    #     }
-
-    # def _create_resource_plot(self, metrics):
-    #     """Create resource discrimination plot"""
-    #     fig, ax = plt.subplots()
-    #     metrics['workload'].plot(kind='bar', ax=ax)
-    #     ax.set_title('Resource Workload Distribution')
-    #     return fig
-
-    # def _create_time_plot(self, metrics):
-    #     """Create time bias plot"""
-    #     fig, ax = plt.subplots()
-    #     metrics['activity_durations'].plot(kind='bar', ax=ax)
-    #     ax.set_title('Activity Duration Distribution')
-    #     return fig
-
-    # def _create_case_plot(self, metrics):
-    #     """Create case priority plot"""
-    #     fig, ax = plt.subplots()
-    #     metrics['complexity'].plot(kind='hist', ax=ax)
-    #     ax.set_title('Case Complexity Distribution')
-    #     return fig
-
-    # def _create_handover_plot(self, metrics):
-    #     """Create handover analysis plot"""
-    #     fig, ax = plt.subplots()
-    #     metrics['handovers'].plot(kind='hist', ax=ax)
-    #     ax.set_title('Handover Distribution')
-    #     return fig
 
     # Update _process_data method
     def _process_data(self):
         """Process OCEL data into efficient DataFrame format"""
         try:
+            start=log_time("_process_data","START")
             logger.info("Processing OCEL data")
             events_data = []
             relationships_data = []
@@ -321,6 +275,7 @@ class UnfairOCELAnalyzer:
             self._create_outlier_plots()
 
             logger.info("Successfully processed OCEL data")
+            log_time("_process_data","END",start)
 
         except Exception as e:
             logger.error(f"Error processing data: {str(e)}")
@@ -329,6 +284,7 @@ class UnfairOCELAnalyzer:
 
     def _build_trace_index(self):
         """Build indices for quick trace lookups"""
+        start=log_time("_build_trace_index","START")
         logger.info("Building trace indices")
         self.resource_events = {}
         self.case_events = {}
@@ -350,9 +306,12 @@ class UnfairOCELAnalyzer:
                 self.activity_events[row['activity']] = []
             self.activity_events[row['activity']].append(row['event_id'])
 
+        log_time("_build_trace_index","END",start)
+
     def _process_outliers(self):
         """Process and detect outliers in event data"""
         try:
+            start=log_time("_process_outliers","START")
             logger.info("Processing outliers")
             self.outliers = {
                 'duration': self._detect_duration_outliers(),
@@ -360,6 +319,7 @@ class UnfairOCELAnalyzer:
                 'case_complexity': self._detect_case_outliers(),
                 'failures': self._detect_failure_patterns()
             }
+            log_time("_process_outliers","END",start)
         except Exception as e:
             logger.error(f"Error processing outliers: {str(e)}")
             raise
@@ -367,6 +327,7 @@ class UnfairOCELAnalyzer:
     def _detect_duration_outliers(self) -> Dict[str, OutlierMetrics]:
         """Enhanced duration outlier detection using OCPM model and thresholds"""
         try:
+            start=log_time("_detect_duration_outliers","START")
             # Create events DataFrame (same as before)
             events_df = pd.DataFrame([{
                 'event_id': event['ocel:id'],
@@ -479,7 +440,7 @@ class UnfairOCELAnalyzer:
                         }
                     }
                 )
-
+            log_time("_detect_duration_outliers","END",start)
             return outliers
 
         except Exception as e:
@@ -503,7 +464,6 @@ class UnfairOCELAnalyzer:
             activities = self.process_validator.get_expected_flow().get(object_type, [])
             if not activities:
                 return None
-
             return activities.index(activity)
         except ValueError:
             return None
@@ -511,6 +471,7 @@ class UnfairOCELAnalyzer:
     def _detect_resource_outliers(self) -> Dict[str, OutlierMetrics]:
         """Optimized resource outlier detection with full event traceability"""
         try:
+            start=log_time("_detect_resource_outliers","START")
             # Pre-process events into a DataFrame for faster analysis
             events_df = pd.DataFrame([{
                 'event_id': event['ocel:id'],
@@ -566,7 +527,7 @@ class UnfairOCELAnalyzer:
                         }
                     }
                 )
-
+            log_time("_detect_resource_outliers","END",start)
             return outliers
 
         except Exception as e:
@@ -610,6 +571,7 @@ class UnfairOCELAnalyzer:
                     - details: Dict with complete metrics, events, temporal data and outlier patterns
             """
         try:
+            start=log_time("_detect_case_outliers","START")
             # Pre-process events into a DataFrame for faster analysis
             events_df = pd.DataFrame([{
                 'event_id': event['ocel:id'],
@@ -687,7 +649,7 @@ class UnfairOCELAnalyzer:
                         }
                     }
                 )
-
+            log_time("_detect_case_outliers","END",start)
             return outliers
 
         except Exception as e:
@@ -698,6 +660,7 @@ class UnfairOCELAnalyzer:
     def _detect_failure_patterns(self) -> Dict[str, Any]:
         """Enhanced failure pattern detection with full event traceability"""
         try:
+            start=log_time("_detect_failure_patterns","START")
             expected_flow = self.process_validator.get_expected_flow()
             logger.info(f"Expected flow derived as : {expected_flow}")
 
@@ -934,7 +897,7 @@ class UnfairOCELAnalyzer:
                         },
                         'events': case_data['event_id'].tolist()
                     })
-
+            log_time("_detect_failure_patterns","END",start)
             return failures
 
         except Exception as e:
@@ -946,6 +909,7 @@ class UnfairOCELAnalyzer:
     def _format_ai_response(self, response_text: str) -> Dict:
         """Format AI analysis response into structured sections"""
         try:
+            start=log_time("_format_ai_response","START")
             sections = response_text.split('\n\n')
             formatted_response = {
                 'summary': sections[0] if sections else '',
@@ -964,7 +928,7 @@ class UnfairOCELAnalyzer:
                     continue
 
                 formatted_response[current_section].append(line)
-
+            log_time("_format_ai_response","END",start)
             return formatted_response
 
         except Exception as e:
@@ -978,6 +942,7 @@ class UnfairOCELAnalyzer:
 
     def _build_analysis_context(self, tab_type: str, metrics: Dict) -> Dict:
         """Build comprehensive analysis context from outliers data"""
+        start=log_time("_build_analysis_context","START")
         context = {
             'title': '',
             'metrics': [],
@@ -1035,18 +1000,19 @@ class UnfairOCELAnalyzer:
                 f"Average case duration: {self._calculate_avg_case_duration():.2f} hours"
             ])
             context['patterns'] = self._extract_case_patterns(case_data)
-
+        log_time("_build_analysis_context","END",start)
         return context
 
     def _format_process_context(self) -> str:
         """Format overall process context"""
+        start=log_time("_format_process_context","START")
         process_stats = {
             'total_events': len(self.events_df) if hasattr(self, 'events_df') else 0,
             'object_types': self._get_unique_object_types(),
             'activities': self._get_unique_activities(),
             'object_interactions': self._analyze_object_interactions()
         }
-
+        log_time("_format_process_context","END",start)
         return f"""
         Process Overview:
         - Total events: {process_stats['total_events']}
@@ -1056,15 +1022,20 @@ class UnfairOCELAnalyzer:
         """
 
     def _format_metrics(self, metrics: List[str]) -> str:
+        start=log_time("_format_metrics","START")
         """Format metrics for AI analysis"""
+        log_time("_format_metrics","END",start)
         return '\n'.join(f"- {metric}" for metric in metrics)
 
     def _format_patterns(self, patterns: List[str]) -> str:
+        start=log_time("_format_patterns","START")
         """Format patterns for AI analysis"""
+        log_time("_format_patterns","END",start)
         return '\n'.join(f"- {pattern}" for pattern in patterns)
 
     def _extract_failure_patterns(self, failures: Dict) -> List[str]:
         """Extract key failure patterns from outlier data"""
+        start=log_time("_extract_failure_patterns","START")
         patterns = []
 
         # Analyze sequence violations
@@ -1108,11 +1079,12 @@ class UnfairOCELAnalyzer:
             if rework_activities:
                 most_rework = max(rework_activities.items(), key=lambda x: x[1])
                 patterns.append(f"Most reworked activity: {most_rework[0]} ({most_rework[1]} times)")
-
+        log_time("_extract_failure_patterns","END",start)
         return patterns
 
     def _extract_resource_patterns(self, resource_data: Dict) -> List[str]:
         """Extract key resource patterns from outlier data"""
+        start=log_time("_extract_resource_patterns","START")
         patterns = []
 
         # Analyze workload distribution
@@ -1143,10 +1115,12 @@ class UnfairOCELAnalyzer:
         if specialists:
             patterns.append(f"Specialized resources: {len(specialists)} resources with focused activities")
 
+        log_time("_extract_resource_patterns","END",start)
         return patterns
 
     def _extract_timing_patterns(self, duration_data: Dict) -> List[str]:
         """Extract key timing patterns from outlier data"""
+        start=log_time("_extract_timing_patterns","START")
         patterns = []
 
         # Analyze systematic delays
@@ -1173,10 +1147,12 @@ class UnfairOCELAnalyzer:
         if bottlenecks:
             patterns.append(f"Process bottlenecks identified in: {', '.join(bottlenecks)}")
 
+        log_time("_extract_timing_patterns","END",start)
         return patterns
 
     def _extract_case_patterns(self, case_data: Dict) -> List[str]:
         """Extract key case patterns from outlier data"""
+        start=log_time("_extract_case_patterns","START")
         patterns = []
 
         # Analyze case complexity
@@ -1202,6 +1178,8 @@ class UnfairOCELAnalyzer:
         if multi_object_cases:
             patterns.append(f"Multi-object interactions: {len(multi_object_cases)} cases with multiple object types")
 
+
+        log_time("_extract_case_patterns","END",start)
         return patterns
 
     def _get_unique_object_types(self) -> Set[str]:
@@ -1231,6 +1209,7 @@ class UnfairOCELAnalyzer:
 
     def _format_object_interactions(self) -> str:
         """Format object interactions for AI analysis"""
+        start=log_time("_format_object_interactions","START")
         object_types = self._get_unique_object_types()
         interactions = defaultdict(int)
 
@@ -1241,7 +1220,7 @@ class UnfairOCELAnalyzer:
                 if len(object_types) > 1:
                     key = tuple(sorted(object_types))
                     interactions[key] += 1
-
+        log_time("_format_object_interactions","END",start)
         return "\n".join(
             f"- {' - '.join(types)}: {count} interactions"
             for types, count in sorted(interactions.items(), key=lambda x: x[1], reverse=True)
@@ -1249,6 +1228,7 @@ class UnfairOCELAnalyzer:
 
     def _calculate_avg_case_duration(self) -> float:
         """Calculate average case duration in hours"""
+        start=log_time("_calculate_avg_case_duration","START")
         case_durations = []
         for case_events in self.case_events.values():
             if case_events:
@@ -1261,10 +1241,13 @@ class UnfairOCELAnalyzer:
                     duration = (max(timestamps) - min(timestamps)).total_seconds() / 3600
                     case_durations.append(duration)
 
+
+        log_time("_calculate_avg_case_duration","END",start)
         return sum(case_durations) / len(case_durations) if case_durations else 0.0
 
     def get_explanation(self, tab_type: str, metrics: Dict) -> Dict:
         """Generate AI explanation for OCEL analysis results"""
+        start=log_time("get_explanation","START")
         logger.info(f"Generating OCEL explanation for: {tab_type}")
 
         try:
@@ -1308,7 +1291,7 @@ class UnfairOCELAnalyzer:
                 temperature=0.7,
                 max_tokens=500
             )
-
+            log_time("get_explanation","END",start)
             return self._format_ai_response(response.choices[0].message.content)
 
         except Exception as e:
@@ -1321,6 +1304,7 @@ class UnfairOCELAnalyzer:
     def _display_resource_details(self, resource: str, details: Dict):
         """Helper method to display resource details"""
         try:
+            start=log_time("_display_resource_details","START")
             logger.info("### Resource Details")
 
             # Show metrics
@@ -1335,6 +1319,7 @@ class UnfairOCELAnalyzer:
                 activity_counts = events_df['activity'].value_counts()
                 logger.info(f"Activities Performed by {resource}: {activity_counts.to_dict()}")
 
+            log_time("_display_resource_details","END",start)
         except Exception as e:
             logger.error(f"Error displaying resource details: {str(e)}")
 
@@ -1349,6 +1334,7 @@ class UnfairOCELAnalyzer:
         #     }
         """Helper method to analyze time data and return structured results"""
         try:
+            start=log_time("_analyze_time_data","START")
             # Create duration outlier analysis
             duration_info = []
             for activity, metrics in duration_data.items():
@@ -1363,6 +1349,7 @@ class UnfairOCELAnalyzer:
 
             if duration_info:
                 df = pd.DataFrame(duration_info)
+                log_time("_analyze_time_data","END",start)
                 return {
                     'duration_analysis': df.to_dict(orient='records'),
                     'plot_data': {
@@ -1395,6 +1382,7 @@ class UnfairOCELAnalyzer:
         }
         
         try:
+            start=log_time("prepare_case_analysis","START")
             # Process case visualization data
             for case_id, metrics in case_data.items():
                 if hasattr(metrics, 'details'):
@@ -1410,6 +1398,7 @@ class UnfairOCELAnalyzer:
                     # Prepare full case details using the previously defined function
                     result["case_details"][case_id] = self.prepare_case_details(case_id, metrics.details)
             
+            log_time("prepare_case_analysis","END",start)
             return result
             
         except Exception as e:
@@ -1427,6 +1416,7 @@ class UnfairOCELAnalyzer:
         Returns a structured dictionary that can be easily consumed by a frontend application
         """
         try:
+            start=log_time("prepare_case_details","START")
             result = {
                 "case_id": case_id,
                 "warnings": [],
@@ -1489,6 +1479,8 @@ class UnfairOCELAnalyzer:
                     for obj_type, count in object_counts.items()
                 ]
 
+
+            log_time("prepare_case_details","END",start)
             return result
         
         except Exception as e:
@@ -1521,6 +1513,7 @@ class UnfairOCELAnalyzer:
         #         'message': 'No time analysis data available'
         #     }
         try:
+            start=log_time("_analyze_timing_gaps","START")
             timing_gaps = []
             for activity, metrics in duration_data.items():
                 if hasattr(metrics, 'details'):
@@ -1536,6 +1529,7 @@ class UnfairOCELAnalyzer:
                         })
 
             if timing_gaps:
+                log_time("_analyze_timing_gaps","END",start)
                 return pd.DataFrame(timing_gaps).to_dict(orient='records')
             else:
                 return None
@@ -1547,6 +1541,7 @@ class UnfairOCELAnalyzer:
 
     def _get_events_dataframe(self, event_ids: List[str]) -> pd.DataFrame:
         """Helper method to create DataFrame from event IDs"""
+        start=log_time("_get_events_dataframe","START")
         events_data = []
         for event_id in event_ids:
             event = next((e for e in self.ocel_data['ocel:events'] if e['ocel:id'] == event_id), None)
@@ -1559,12 +1554,16 @@ class UnfairOCELAnalyzer:
                     'case_id': event.get('ocel:attributes', {}).get('case_id', 'Unknown'),
                     'objects': ', '.join(obj['id'] for obj in event.get('ocel:objects', []))
                 })
+        
+        log_time("_get_events_dataframe","END",start)
         return pd.DataFrame(events_data)
 
     def _get_event_details(self, event_id: str) -> Dict:
         """Helper method to get event details from OCEL data"""
+        start=log_time("_get_event_details","START")
         event = next((e for e in self.ocel_data['ocel:events'] if e['ocel:id'] == event_id), None)
         if event:
+            log_time("_get_event_details","END",start)
             return {
                 'Event ID': event_id,
                 'Timestamp': event['ocel:timestamp'],
@@ -1781,6 +1780,7 @@ class UnfairOCELAnalyzer:
             }
         
         # Process failure counts
+        start=log_time("process_failure_patterns","START")
         failure_counts = {
             'Sequence Violations': len(failures_data.get('sequence_violations', [])),
             'Incomplete Cases': len(failures_data.get('incomplete_cases', [])),
@@ -1835,6 +1835,7 @@ class UnfairOCELAnalyzer:
             }
         
         # Return processed data
+        log_time("process_failure_patterns","END",start)
         return {
             "status": "success" if any(failure_counts.values()) else "info",
             "message": "Failure patterns processed successfully" if any(failure_counts.values()) else "No failure patterns found",
@@ -1857,6 +1858,7 @@ class UnfairOCELAnalyzer:
         for resource, metrics in resource_data.items():
             if isinstance(metrics, (dict, object)):  # Validate metrics object
                 try:
+                    start=log_time("_process_resource_data","START")
                     workload_data.append({
                         'Resource': resource,
                         'Z-Score': getattr(metrics, 'z_score', 0),
@@ -1875,6 +1877,7 @@ class UnfairOCELAnalyzer:
                             'events': metrics.details.get('events', {}),
                             'patterns': metrics.details.get('outlier_patterns', {})
                         }
+                    log_time("_process_resource_data","END",start)
                 except Exception as e:
                     logger.error(f"Error processing resource metrics: {str(e)}")
 
@@ -1892,25 +1895,29 @@ class UnfairOCELAnalyzer:
         }
 
         try:
+            start=log_time("_get_resource_explanation","START")
             explanation = get_explanation('resource', workload_metrics)
             return {
                 "summary": explanation.get('summary', 'No summary available'),
                 "insights": explanation.get('insights', []),
                 "recommendations": explanation.get('recommendations', [])
             }
+
+            log_time("_get_resource_explanation","END",start)
         except Exception as e:
             logger.error(f"Error getting resource explanation: {str(e)}")
             return {"error": "Unable to generate resource insights"}
 
     def get_resource_outlier_data(self):
         """API-friendly function to return resource outlier analysis in JSON format."""
+        start=log_time("get_resource_outlier_data","START")
         resource_data = self.outliers.get('resource_load', {})
         if not resource_data:
             return {"message": "No resource analysis data available"}
 
         workload_data, resource_details = self._process_resource_data(resource_data)
         explanation = self._get_resource_explanation(self.get_explanation, self.resource_events)
-
+        log_time("get_resource_outlier_data","END",start)
         return {
             "workload_data": workload_data,
             "resource_details": resource_details,
@@ -2138,7 +2145,7 @@ class UnfairOCELAnalyzer:
     def analyze_time_outliers(self):
         """Analyze time outliers and return structured results."""
         logger.debug("Processing Time Analysis")
-
+        start=log_time("analyze_time_outliers","START")
         # Validate duration data exists
         duration_data = self.outliers.get('duration', {})
         if not duration_data:
@@ -2171,7 +2178,7 @@ class UnfairOCELAnalyzer:
             except Exception as e:
                 logger.error(f"Error getting time explanation: {str(e)}")
                 results['explanation_error'] = str(e)
-                
+            log_time("analyze_time_outliers","END",start)   
             return results
             
         except Exception as e:

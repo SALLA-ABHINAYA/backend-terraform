@@ -17,7 +17,7 @@ from .OCELDataManager import OCELDataManager
 
 from utils import get_azure_openai_client
 
-
+from backend.MasterApi.Routers.central_log import log_time
 #Logger
 # Configure logging
 import logging
@@ -42,6 +42,7 @@ class OCELEnhancedFMEA:
         """Initialize analyzer with enhanced error handling and logging"""
         logger.info("Initializing OCELEnhancedFMEA")
         try:
+            start=log_time("Constructor OCELEnhancedFMEA","START")
             self.ocel_data = ocel_data
 
             # Initialize OCEL data manager for relationship/attribute management
@@ -146,7 +147,7 @@ class OCELEnhancedFMEA:
                     self.fmea_settings = json.load(f)
 
             logger.info("Initialization complete")
-
+            log_time("Constructor OCELEnhancedFMEA","END",start)
         except Exception as e:
             logger.error(f"Error initializing OCELEnhancedFMEA: {str(e)}")
             logger.error(traceback.format_exc())
@@ -155,6 +156,7 @@ class OCELEnhancedFMEA:
     def _generate_fmea_settings(self) -> None:
         """Generate FMEA settings using Azure OpenAI based on OCEL model"""
         try:
+            start=log_time("_generate_fmea_settings","START")
             # Load OCEL model
             with open('api_response/output_ocel.json', 'r') as f:
                 ocel_model = json.load(f)
@@ -256,6 +258,7 @@ class OCELEnhancedFMEA:
             #     logger.error(f"Error sending FMEA settings to API endpoint: {str(e)}")
 
             logger.info(f"Generated FMEA settings saved to {output_path}")
+            log_time("_generate_fmea_settings","END",start)
             return settings
 
         except Exception as e:
@@ -267,9 +270,12 @@ class OCELEnhancedFMEA:
     def _initialize_timing_thresholds(self) -> Dict[str, Dict]:
         """Initialize timing thresholds from OCEL threshold file"""
         try:
+            start=log_time("_initialize_timing_thresholds","START")
             with open('api_response/output_ocel_threshold.json', 'r') as f:
                 thresholds = json.load(f)
             logger.info("Loaded timing thresholds from file")
+
+            log_time("_initialize_timing_thresholds","END",start)
             return thresholds
         except Exception as e:
             logger.error(f"Error loading timing thresholds: {str(e)}")
@@ -286,6 +292,7 @@ class OCELEnhancedFMEA:
         """Build graph of object relationships from events"""
         logger.info("Starting to build object relationships")
         try:
+            start=log_time("_build_object_relationships","START")
             relationships = defaultdict(list)
 
             # Track processed pairs to avoid duplicates
@@ -343,6 +350,8 @@ class OCELEnhancedFMEA:
                 logger.info(f"Average relationships per object: {avg_relationships:.2f}")
                 logger.info(f"Maximum relationships for an object: {max_relationships}")
 
+            log_time("_build_object_relationships","END",start)
+
             return result
 
         except Exception as e:
@@ -361,6 +370,7 @@ class OCELEnhancedFMEA:
             bool: True if timing violation detected, False otherwise
         """
         try:
+            start=log_time("_check_timing_violation","START")
             # Get activity and case info
             activity = event['ocel:activity']
             case_id = event['case_id']
@@ -406,6 +416,7 @@ class OCELEnhancedFMEA:
                             violation_found = True
                             break
 
+            log_time("_check_timing_violation","END",start)
             return violation_found
 
         except Exception as e:
@@ -429,6 +440,7 @@ class OCELEnhancedFMEA:
             bool: True if activity has temporal dependencies, False otherwise
         """
         try:
+            start=log_time("_has_temporal_dependency","START")
             # Define temporal dependency map for activities
             temporal_dependencies = self.fmea_settings['temporal_dependencies']
 
@@ -488,6 +500,8 @@ class OCELEnhancedFMEA:
                         if max_delay and self._exceeds_max_delay(event, max_delay):
                             return True
 
+
+                log_time("_has_temporal_dependency","END",start)
                 return has_timing_requirements
 
             return False
@@ -531,6 +545,7 @@ class OCELEnhancedFMEA:
         - Risk assessment must complete before settlement
         - Position reconciliation must follow settlement
         """
+        start=log_time("_has_timing_dependency_violation","START")
         activity = event['ocel:activity']
         timestamp = pd.to_datetime(event['ocel:timestamp'])
 
@@ -547,6 +562,8 @@ class OCELEnhancedFMEA:
                 case_events['ocel:timestamp'] < timestamp
                 ]['ocel:activity'].unique()
 
+        log_time("_has_timing_dependency_violation","END",start)
+
             # Check if any required activity is missing
             if not all(req in prior_activities for req in required_activities):
                 return True
@@ -555,6 +572,8 @@ class OCELEnhancedFMEA:
 
     def _compute_object_stats(self) -> Dict[str, Dict[str, Any]]:
         """Compute object-level statistics"""
+
+        start=log_time("_compute_object_stats","START")
         stats = defaultdict(lambda: {
             'count': 0,
             'activities': set(),
@@ -573,10 +592,13 @@ class OCELEnhancedFMEA:
                     if attr not in ['id', 'type']:
                         stats[obj_type]['attributes'][attr].add(str(value))
 
+        log_time("_compute_object_stats","END",start)
+
         return dict(stats)
 
     def _analyze_sequence_patterns(self) -> Dict[str, List[str]]:
         """Analyze common sequence patterns in the log"""
+        start=log_time("_analyze_sequence_patterns","START")
         logger.info("Starting sequence pattern analysis")
         patterns = defaultdict(list)
 
@@ -617,6 +639,9 @@ class OCELEnhancedFMEA:
                     continue
 
             logger.info(f"Found {pattern_count} unique sequence patterns across {len(patterns)} object types")
+
+            log_time("_analyze_sequence_patterns","END",start)
+
             return dict(patterns)
 
         except Exception as e:
@@ -626,6 +651,8 @@ class OCELEnhancedFMEA:
 
     def calculate_likelihood(self, failure_mode: OCELFailureMode) -> int:
         """Calculate likelihood considering OCPM patterns"""
+
+        start=log_time("calculate_likelihood","START")
         likelihood = 1
 
         # Analyze historical occurrence
@@ -653,6 +680,8 @@ class OCELEnhancedFMEA:
         # Consider temporal patterns
         if self._has_temporal_dependency(failure_mode.activity):
             likelihood += 1
+
+        log_time("calculate_likelihood","END",start)
 
         return min(likelihood, 10)
 
@@ -813,6 +842,8 @@ class OCELEnhancedFMEA:
             return []
 
     def _compute_activity_stats(self) -> Dict[str, Dict[str, Any]]:
+
+        start=log_time("_compute_activity_stats","START")
         """Compute comprehensive activity statistics"""
         stats = defaultdict(lambda: {
             'count': 0,
@@ -840,11 +871,14 @@ class OCELEnhancedFMEA:
             for attr, value in event.get('ocel:attributes', {}).items():
                 stats[activity]['attribute_patterns'][attr].add(str(value))
 
+        log_time("_compute_activity_stats","END",start)
+
         return dict(stats)
 
     def calculate_severity(self, failure_mode: OCELFailureMode) -> int:
         """Calculate severity in OCPM context"""
         try:
+            start=log_time("calculate_severity","START")
             # Get base severity from settings
             severity = self.fmea_settings['object_criticality'].get(failure_mode.object_type, 1)
 
@@ -867,6 +901,8 @@ class OCELEnhancedFMEA:
                    for keyword in self.fmea_settings['regulatory_keywords']):
                 severity += 1
 
+            log_time("calculate_severity","END",start)
+
             return min(severity, 10)
 
         except Exception as e:
@@ -876,6 +912,7 @@ class OCELEnhancedFMEA:
 
     def _calculate_cascade_depth(self, failure_mode: OCELFailureMode) -> int:
         """Calculate how deep failures can cascade"""
+        start=log_time("_calculate_cascade_depth","START")
         depth = 0
         affected = {failure_mode.activity}
         current_level = {failure_mode.activity}
@@ -903,10 +940,13 @@ class OCELEnhancedFMEA:
             else:
                 break
 
+        log_time("_calculate_cascade_depth","END",start)
+
         return depth
 
     def identify_failure_modes(self) -> List[Dict]:
         """Enhanced failure mode identification"""
+        start=log_time("identify_failure_modes","START")
         failure_modes = []
 
         # Object-level failures
@@ -924,6 +964,9 @@ class OCELEnhancedFMEA:
             fm['likelihood'] = self.calculate_likelihood(OCELFailureMode(**fm))
             fm['detectability'] = self.calculate_detectability(OCELFailureMode(**fm))
             fm['rpn'] = fm['severity'] * fm['likelihood'] * fm['detectability']
+
+
+        log_time("identify_failure_modes","END",start)
 
         return sorted(failure_modes, key=lambda x: x['rpn'], reverse=True)
 
@@ -944,6 +987,7 @@ class OCELEnhancedFMEA:
         return single_relation_types
 
     def _identify_event_failures(self) -> List[Dict]:
+        start=log_time("_identify_event_failures","START")
         """Identify event-level failures with detailed tracing"""
         failures = []
         logger.info("Identifying event-level failures")
@@ -1051,9 +1095,13 @@ class OCELEnhancedFMEA:
                     }
                     failures.append(failure)
 
+        log_time("_identify_event_failures","END",start)
+
         return failures
 
     def _identify_object_failures(self) -> List[Dict]:
+
+        start=log_time("_identify_object_failures","START")
         """Identify object-level failures with optimized processing"""
         failures = []
         logger.info("Identifying object-level failures")
@@ -1146,10 +1194,12 @@ class OCELEnhancedFMEA:
                                 'present_attributes': list(event_attrs)
                             }
                         ).__dict__)
+        log_time("_identify_object_failures","END",start)
 
         return failures
 
     def _identify_system_failures(self) -> List[Dict]:
+        start=log_time("_identify_system_failures","START")
         """Identify system-wide failures"""
         failures = []
 
@@ -1187,5 +1237,6 @@ class OCELEnhancedFMEA:
                     'detectability': 4,
                     'rpn': 224
                 })
+        log_time("_identify_system_failures","END",start)
 
         return failures

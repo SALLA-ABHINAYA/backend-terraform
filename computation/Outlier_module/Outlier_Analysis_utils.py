@@ -23,35 +23,47 @@ def load_event_log():
 
     return df
 
+
+
+from backend.MasterApi.Routers.central_log import log_time
+
+
 def perform_analysis():
+    start=log_time("perform_analysis_OUTLIER_UTILS","START")
     """Perform OCPM analysis and return processed data."""
     df = load_event_log()
     analyzer = OCPMAnalyzer(df)
 
     ocel_path = analyzer.save_ocel()
-
+    log_time("perform_analysis_OUTLIER_UTILS","END",start)
     return {
         "ocel_path": ocel_path,
         "analyzer": analyzer
-    }
+    } 
 
 def get_object_interactions():
     """Return object type interactions as a JSON response."""
     analysis = perform_analysis()
+    start=log_time("get_object_interactions","START")
     interactions = analysis["analyzer"].analyze_object_interactions()
+    log_time("get_object_interactions","END",start)
     return {"interactions": interactions}
 
 def get_object_metrics():
     """Return object type metrics as a JSON response."""
     analysis = perform_analysis()
+    start=log_time("get_object_metrics","START")
     metrics = analysis["analyzer"].calculate_object_metrics()
+    log_time("get_object_metrics","END",start)
     return {"metrics": metrics}
 
 def get_object_lifecycle_graph(object_type: str):
     """Generate object lifecycle graph and return as DOT format."""
     analysis = perform_analysis()
+    start=log_time("get_object_lifecycle","START")
     lifecycle_graph = analysis["analyzer"].generate_object_lifecycle_graph(object_type)
     dot_graph = nx.nx_pydot.to_pydot(lifecycle_graph)
+    log_time("get_object_lifecycle","END",start)
     return {"graph_dot": dot_graph.to_string()}
 
 def _count_resource_interactions(self) -> int:
@@ -191,6 +203,7 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 def initialize_unfair_ocel_analyzer_with_failure_patterns():
+    start=log_time("initialize_unfair_ocel_analyzer_with_failure_patterns","START")
     """Initialize UnfairOCELAnalyzer with OCEL data and process failure patterns."""
 
     unfair_analyzer = UnfairOCELAnalyzer(OCEL_PATH)
@@ -198,6 +211,7 @@ def initialize_unfair_ocel_analyzer_with_failure_patterns():
     failure_patterns = unfair_analyzer.process_failure_patterns()
     
     #return (resouce_outlier_data)
+    log_time("initialize_unfair_ocel_analyzer_with_failure_patterns","END",start)
     return {"failure_logic": failure_patterns,"failure_markdown": markdown_failure_patterns}
 
 
@@ -1446,3 +1460,57 @@ def case_outlier_logic(self):
                     except Exception as e:
                         logger.error(f"Error getting case explanation: {str(e)}")
                         st.error("Unable to generate case insights")
+
+
+def _calculate_time_metrics(self):
+        """Calculate time-based metrics"""
+        return {
+            'activity_durations': self.relationships_df.groupby('activity')['timestamp'].agg(
+                lambda x: (x.max() - x.min()).total_seconds() / 3600
+            )
+        }
+
+def _calculate_case_metrics(self):
+        """Calculate case-based metrics"""
+        return {
+            'complexity': self.relationships_df.groupby('case_id')['activity'].nunique(),
+            'duration': self.relationships_df.groupby('case_id')['timestamp'].agg(
+                lambda x: (x.max() - x.min()).total_seconds() / 3600
+            )
+        }
+
+def _calculate_handover_metrics(self):
+        """Calculate handover metrics between resources"""
+        return {
+            'handovers': self.relationships_df.groupby('case_id')['resource'].agg(list).apply(
+                lambda x: len([i for i in range(len(x) - 1) if x[i] != x[i + 1]])
+            )
+        }
+
+def _create_resource_plot(self, metrics):
+        """Create resource discrimination plot"""
+        fig, ax = plt.subplots()
+        metrics['workload'].plot(kind='bar', ax=ax)
+        ax.set_title('Resource Workload Distribution')
+        return fig
+
+def _create_time_plot(self, metrics):
+        """Create time bias plot"""
+        fig, ax = plt.subplots()
+        metrics['activity_durations'].plot(kind='bar', ax=ax)
+        ax.set_title('Activity Duration Distribution')
+        return fig
+
+def _create_case_plot(self, metrics):
+        """Create case priority plot"""
+        fig, ax = plt.subplots()
+        metrics['complexity'].plot(kind='hist', ax=ax)
+        ax.set_title('Case Complexity Distribution')
+        return fig
+
+def _create_handover_plot(self, metrics):
+        """Create handover analysis plot"""
+        fig, ax = plt.subplots()
+        metrics['handovers'].plot(kind='hist', ax=ax)
+        ax.set_title('Handover Distribution')
+        return fig

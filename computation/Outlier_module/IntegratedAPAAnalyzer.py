@@ -8,6 +8,8 @@ from utils import get_azure_openai_client
 import plotly.express as px
 
 
+from backend.MasterApi.Routers.central_log import log_time
+
 
 class IntegratedAPAAnalyzer:
     """Integrated APA Analytics with AI Analysis capabilities"""
@@ -22,6 +24,7 @@ class IntegratedAPAAnalyzer:
     def load_ocel(self, file_path: str) -> None:
         """Load and process OCEL data"""
         try:
+            start=log_time("load_ocel","START")
             with open(file_path, 'r', encoding='utf-8') as f:
                 self.ocel_data = json.load(f)
 
@@ -40,7 +43,7 @@ class IntegratedAPAAnalyzer:
 
             self.events_df = pd.DataFrame(events)
             self._calculate_statistics()
-
+            log_time("load_ocel","END",start)
         except Exception as e:
             raise Exception(f"Error loading OCEL file: {str(e)}")
 
@@ -75,6 +78,7 @@ class IntegratedAPAAnalyzer:
     def analyze_with_ai(self, question: str) -> str:
         """AI-powered OCEL analysis"""
         try:
+            start=log_time("analyze_with_ai","START")
             case_events = self.events_df.sort_values('timestamp')
             events_context = []
 
@@ -115,7 +119,7 @@ class IntegratedAPAAnalyzer:
                 temperature=0.7,
                 max_tokens=800
             )
-
+            log_time("analyze_with_ai","END",start)
             return response.choices[0].message.content
 
         except Exception as e:

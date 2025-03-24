@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 # Increase pandas display limit
 pd.set_option("styler.render.max_elements", 600000)
 
+from backend.MasterApi.Routers.central_log import log_time
 
 class OCELDataManager:
     """Manages OCEL data loading and common operations"""
@@ -20,6 +21,7 @@ class OCELDataManager:
     def __init__(self, ocel_path: str):
         """Initialize with path to OCEL data"""
         try:
+            start=log_time("OCELDataManager constructor","START")
             # Load OCEL relationship definitions
             with open('api_response/output_ocel.json', 'r') as f:
                 self.ocel_model = json.load(f)
@@ -48,11 +50,13 @@ class OCELDataManager:
             self.object_activities = self._build_object_activities_map()
             logger.info(f"Built object activities map: {json.dumps(self.object_activities, indent=2)}")
 
+            log_time("OCELDataManager constructor","END",start)
         except Exception as e:
             logger.error(f"Error initializing OCEL data manager: {str(e)}")
             raise
 
     def _create_events_df(self) -> pd.DataFrame:
+        start=log_time("_create_events_df","START")
         """Create DataFrame from OCEL events"""
         events_data = []
         for event in self.ocel_data['ocel:events']:
@@ -72,12 +76,13 @@ class OCELDataManager:
                 event_data[key] = value
 
             events_data.append(event_data)
-
+        log_time("_create_events_df","END",start)
         return pd.DataFrame(events_data)
 
     def _build_object_attribute_maps(self) -> Dict[str, List[str]]:
         """Build attribute maps for each object type strictly based on OCEL model attributes"""
         try:
+            start=log_time("_build_object_attribute_maps","START")
             # Initialize empty maps
             attribute_maps = {}
 
@@ -94,6 +99,8 @@ class OCELDataManager:
                     f"Loaded {len(attribute_maps[obj_type])} attributes for {obj_type}: {attribute_maps[obj_type]}")
 
             logger.info(f"Built object attribute maps: {json.dumps(attribute_maps, indent=2)}")
+
+            log_time("_build_object_attribute_maps","END",start)
             return attribute_maps
 
         except Exception as e:
@@ -102,6 +109,7 @@ class OCELDataManager:
             return {}
 
     def _build_object_activities_map(self) -> Dict[str, List[str]]:
+        start=log_time("_build_object_activities_map","START")
         """Build map of expected activities for each object type"""
         activities_map = {}
 
@@ -133,13 +141,18 @@ class OCELDataManager:
             activities_map[obj_type] = sorted(list(activities_map[obj_type]))
             logger.info(f"Activities for {obj_type}: {activities_map[obj_type]}")
 
+
+        log_time("_build_object_activities_map","END",start)
         return activities_map
 
     def get_expected_attributes(self, obj_type: str) -> Set[str]:
         """Get expected attributes for object type"""
         try:
+            start=log_time("get_expected_attributes","START")
             attributes = set(self.object_attributes.get(obj_type, []))
             logger.info(f"Getting expected attributes for {obj_type}: {sorted(list(attributes))}")
+
+            log_time("get_expected_attributes","END",start)
             return attributes
         except Exception as e:
             logger.error(f"Error getting expected attributes for {obj_type}: {str(e)}")

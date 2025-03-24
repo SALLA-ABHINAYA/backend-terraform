@@ -70,7 +70,7 @@ from backend.models.pydantic_models import CaseAnalysisDocument
 
 from backend.utils.helpers import extract_json_schema
 from backend.utils.helpers import convert_timestamps
-
+from .central_log import log_time
 
 out_router = APIRouter(prefix="/outlier-analysis", tags=["Outlier Analysis"])
 
@@ -91,6 +91,7 @@ async def read_root(request: Request):
 async def object_interactions():
     """API endpoint for object type interactions."""
     try:
+        start=log_time("object_interactions","START")
         interactions_data = get_object_interactions()
         print(f"Type of interactions: {type(interactions_data)}")
         print(f"Content of interactions: {interactions_data}")
@@ -114,9 +115,9 @@ async def object_interactions():
                 interactions_list.append(interaction)
 
         # print(f"Interactions list: {interactions_list}")
-        print('starting')
-        print(extract_json_schema(interactions_list))
-        
+      #  print('starting')
+      #  print(extract_json_schema(interactions_list))
+        log_time("object_interactions","END",start)
         return {"interactions": interactions_list}
     except Exception as e:
         print(f"Error in object_interactions: {str(e)}")
@@ -128,7 +129,9 @@ async def object_interactions():
 def object_metrics():
             """API endpoint for object type metrics."""
             try:
+                start=log_time("object_metrics","START")
                 metrics = get_object_metrics()
+                log_time("object_metrics","END",start)
                 return {"metrics": metrics}  # Return as JSON
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
@@ -142,7 +145,9 @@ def object_metrics():
 def object_lifecycle(object_type: str):
             """API endpoint for object lifecycle graph."""
             try:
+                start=log_time("object_lifecycle","START")
                 lifecycle_graph = get_object_lifecycle_graph(object_type)
+                log_time("object_lifecycle","END",start)
                 return {"lifecycle_graph": lifecycle_graph}  # Return as JSON
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
@@ -160,6 +165,7 @@ def run_ai_analysis():
         raise HTTPException(status_code=404, detail="process_data.json file not found")
 
     try:
+        start=log_time("run_ai_analysis", "START")
         analyzer = IntegratedAPAAnalyzer()
         analyzer.load_ocel(ocel_path)
 
@@ -175,7 +181,7 @@ def run_ai_analysis():
             "total_resources": stats['general']['total_resources'],
             "ai_analysis": analysis_result
         }
-
+        log_time("run_ai_analysis", "END",start)
         return JSONResponse(response)
 
     except FileNotFoundError:
@@ -196,6 +202,7 @@ def get_visualization_data():
         raise HTTPException(status_code=404, detail="process_data.json file not found")
 
     try:
+        start=log_time("get_visualization_data", "START")
         analyzer = IntegratedAPAAnalyzer()
         analyzer.load_ocel(ocel_path)
 
@@ -211,7 +218,7 @@ def get_visualization_data():
             "activity_distribution": json.loads(plotly.io.to_json(figures["activity_distribution"])),
             "resource_distribution": json.loads(plotly.io.to_json(figures["resource_distribution"]))
         }
-
+        log_time("get_visualization_data", "END",start)
         return JSONResponse(content=visualization_data)
 
     except Exception as e:
@@ -250,7 +257,9 @@ def convert_numpy_types(data):
 async def display_failure_patterns():
     """Display failure patterns."""
     try:
+        start=log_time("display_failure_patterns", "START")
         markdown_logic = initialize_unfair_ocel_analyzer_with_failure_patterns()
+        log_time("display_failure_patterns", "END",start)
         return (markdown_logic)
       #  return {"markdown": markdown_logic}
     except Exception as e:
@@ -266,7 +275,9 @@ async def display_failure_patterns():
 def resource_analysis():
     """Resource analysis of failure patterns."""
     try:
+        start=log_time("resource_analysis", "START")
         resource_analysis_data = initialize_unfair_ocel_analyzer_with_resource_analysis()
+        log_time("resource_analysis", "END",start)
         return resource_analysis_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -283,7 +294,9 @@ class TimeLogic(BaseModel):
 def time_analysis():
     """Time analysis of failure patterns."""
     try:
+        start=log_time("time_analysis", "START")
         time_analysis_data = initialize_unfair_ocel_analyzer_with_time_analysis()
+        log_time("time_analysis", "END",start)
         return (time_analysis_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -297,7 +310,9 @@ def time_analysis():
 async def case_analysis_patterns():
     """Case analysis of failure patterns."""
     try:
+        start=log_time("case_analysis_patterns", "START")
         case_analysis_data = initialize_unfair_ocel_analyzer_with_case_analysis_patterns()
+        log_time("case_analysis_patterns", "END",start)
         return case_analysis_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

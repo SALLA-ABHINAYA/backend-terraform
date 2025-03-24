@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Set
-
+from backend.MasterApi.Routers.central_log import log_time
 
 @dataclass
 class OCELFailureMode:
