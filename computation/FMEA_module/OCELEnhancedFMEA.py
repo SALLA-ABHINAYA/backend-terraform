@@ -555,14 +555,14 @@ class OCELEnhancedFMEA:
             'Settlement': ['Trade Execution', 'Position Reconciliation'],
             'Position Reconciliation': ['Trade Execution']
         }
-
+        
+        log_time("_has_timing_dependency_violation","END",start)
         required_activities = dependencies.get(activity, [])
         if required_activities:
             prior_activities = case_events[
                 case_events['ocel:timestamp'] < timestamp
                 ]['ocel:activity'].unique()
 
-        log_time("_has_timing_dependency_violation","END",start)
 
             # Check if any required activity is missing
             if not all(req in prior_activities for req in required_activities):
