@@ -21,7 +21,6 @@ jobs:
       with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-
     - name: Verify Azure Subscription
       run: az account show
 
