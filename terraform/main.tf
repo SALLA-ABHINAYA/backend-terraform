@@ -1,6 +1,6 @@
 provider "azurerm" {
   features {}
-  version = "~> 3.0"  # Specify  the provider  version if necessary
+  version = "~> 3.0"  # Specify the provider  version if necessary
 }
 
 resource "azurerm_resource_group" "rg" {
