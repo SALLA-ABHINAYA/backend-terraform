@@ -4,7 +4,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "rg" {
   name     = "backend-rg"
-  location = "East US"  # Change to your region
+  location = "East US" 
 }
 
 resource "azurerm_virtual_network" "vnet" {
