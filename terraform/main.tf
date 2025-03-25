@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}
+  version = "~> 3.0"  # Specify the provider version if necessary
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -42,11 +43,6 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   network_interface_ids = [azurerm_network_interface.nic.id]
 
-  admin_ssh_key {
-    username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")  #  Replace it with your SSH key
-  }
-
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
@@ -58,13 +54,4 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
-
-  custom_data = base64encode(<<-EOF
-    #!/bin/bash
-    sudo apt update -y
-    sudo apt install python3 -y
-    git clone https://github.com/your-username/backend-api.git
-    cd backend-api && python3 app.py  #  Modify based on your backend entry point
-  EOF
-  )
 }
