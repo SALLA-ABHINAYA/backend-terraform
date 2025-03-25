@@ -64,7 +64,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sudo apt update -y
     sudo apt install python3 -y
     git clone https://github.com/your-username/backend-api.git
-    cd backend-api && python3 app.py  # Modify  based on your backend entry point
+    cd backend-api && python3 app.py  # Modify based on your backend entry point
   EOF
   )
 }
