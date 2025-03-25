@@ -1,4 +1,4 @@
-name: Deploy Backend to Azure
+name: Deploy to Azure with Terraform
 
 on:
   push:
@@ -8,30 +8,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  # THIS IS THE ONLY LINE NEEDED FOR AUTHENTICATION
 
-    - name: Verify Azure Subscription
-      run: az account show
+      - name: Terraform Init
+        run: terraform init
 
-    - name: Initialize Terraform
-      run: terraform init
+      - name: Terraform Plan
+        run: terraform plan
 
-    - name: Plan Terraform Deployment
-      run: terraform plan
-
-    - name: Apply Terraform Changes
-      run: terraform apply -auto-approve
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
