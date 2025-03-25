@@ -16,7 +16,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2  # Updated to latest version
 
       - name: Azure Login
-        uses: azure/login@v3  # Updated to latest version
+        uses: azure/login@v2  # Updated to latest version
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_TEMP }}
 
