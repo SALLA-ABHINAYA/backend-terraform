@@ -5,7 +5,7 @@ provider "azurerm" {
 
 # Use an existing Resource Group
 data "azurerm_resource_group" "irmai_rg" {
-  name = "14185-irmai-1-jg5p49" # Ensure this name matches the existing resource group
+  name = "14185-irmai-1-jg5p49" # Ensure this   name matches the existing resource group
 }
 
 # Virtual Network
