@@ -83,7 +83,7 @@ resource "azurerm_kubernetes_cluster" "irmai_aks" {
     load_balancer_sku  = "standard"
     dns_service_ip     = "10.0.0.10"
     service_cidr       = "10.0.0.0/16"
-    docker_bridge_cidr = "172.17.0.1/16"
+    
   }
 }
 
