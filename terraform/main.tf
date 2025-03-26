@@ -123,10 +123,15 @@ resource "azurerm_kubernetes_cluster_node_pool" "sysff" {
   mode                  = "User"
 }
 
-# Optional:  Private DNS Zone (Placeholder if you want to manage via TF)
-resource "azurerm_private_dns_zone" "blob_dns" {
+# Check if the private DNS zone already exists
+data "azurerm_private_dns_zone" "existing_blob_dns" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = data.azurerm_resource_group.irmai_rg.name
-  
-  
+}
+
+# Create the private DNS zone if it doesn't exist
+resource "azurerm_private_dns_zone" "blob_dns" {
+  count               = data.azurerm_private_dns_zone.existing_blob_dns.id != "" ? 0 : 1
+  name                = "privatelink.blob.core.windows.net"
+  resource_group_name = data.azurerm_resource_group.irmai_rg.name
 }
