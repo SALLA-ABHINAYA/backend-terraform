@@ -24,7 +24,12 @@ jobs:
         run: cd terraform && terraform init
 
       - name: Plan Terraform
-        run: cd terraform && terraform plan
+        run: cd terraform && terraform plan -out=tfplan
 
       - name: Apply Terraform
-        run: cd terraform && terraform apply -auto-approve
+        run: cd terraform && terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.clientId }}
+          ARM_CLIENT_SECRET: ${{ secrets.clientSecret }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.subscriptionId }}
+          ARM_TENANT_ID: ${{ secrets.tenantId }}
