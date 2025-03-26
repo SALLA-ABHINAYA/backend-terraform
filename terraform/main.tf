@@ -124,7 +124,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "sysff" {
   mode                  = "User"
 }
 
-# Optional: Private DNS Zone (Placeholder if you want to manage via TF)
+# Optional:  Private DNS Zone (Placeholder if you want to manage via TF)
 resource "azurerm_private_dns_zone" "blob_dns" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = azurerm_resource_group.irmai_rg.name
