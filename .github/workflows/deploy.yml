@@ -25,17 +25,7 @@ jobs:
         
       - name: Validate Terraform
         run: cd terraform && terraform validate
-        
-      - name: Terraform Import Virtual Network
-        run: terraform import azurerm_virtual_network.irmai_vnet "/subscriptions/36448a90-905c-4f48-b1b3-deb171f7c247/resourceGroups/14185-irmai-1-jg5p49/providers/Microsoft.Network/virtualNetworks/irmai-1-jg5p49-vn"
-
-      - name: Terraform Import Network Security Group
-        run: terraform import azurerm_network_security_group.irmai_nsg "/subscriptions/36448a90-905c-4f48-b1b3-deb171f7c247/resourceGroups/14185-irmai-1-jg5p49/providers/Microsoft.Network/networkSecurityGroups/irmai-default-nsg"
-
-      - name: Terraform Import AKS Cluster
-        run: terraform import azurerm_kubernetes_cluster.irmai_aks "/subscriptions/36448a90-905c-4f48-b1b3-deb171f7c247/resourceGroups/14185-irmai-1-jg5p49/providers/Microsoft.ContainerService/managedClusters/irmai-1-jg5p49"
-        
-
+      
       - name: Plan Terraform
         run: cd terraform && terraform plan -out=tfplan
 
