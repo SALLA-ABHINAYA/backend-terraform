@@ -6,8 +6,6 @@ terraform {
     key                   = "infra.tfstate"
   }
 }
-  }
-}
 
 provider "azurerm" {
   features {}
