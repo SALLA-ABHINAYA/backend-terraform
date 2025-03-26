@@ -127,5 +127,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "sysff" {
 resource "azurerm_private_dns_zone" "blob_dns" {
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = data.azurerm_resource_group.irmai_rg.name
-  location            = data.azurerm_resource_group.irmai_rg.location
+  
 }
