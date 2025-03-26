@@ -22,6 +22,10 @@ jobs:
 
       - name: Initialize Terraform
         run: cd terraform && terraform init
+        
+      - name: Validate Terraform
+        run: cd terraform && terraform validate
+        
       - name: Terraform Import
         run: |
           terraform import azurerm_virtual_network.irmai_vnet /subscriptions/36448a90-905c-4f48-b1b3-deb171f7c247/resourceGroups/14185-irmai-1-jg5p49/providers/Microsoft.Network/virtualNetworks/irmai-1-jg5p49-vn
