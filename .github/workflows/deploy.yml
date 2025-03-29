@@ -1,4 +1,4 @@
-name: Deploy to Azure with Terraform
+name: Deploy to Azure
 
 on:
   push:
@@ -6,33 +6,49 @@ on:
       - main
 
 jobs:
-  deploy:
+  terraform:
+    name: "Terraform Apply"
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3  # Updated to latest version
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2  # Updated   to latest version
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
       - name: Azure Login
-        uses: azure/login@v1  # Updated to latest version
+        uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_TEMP }}
 
       - name: Initialize Terraform
-        run: cd terraform && terraform init
-        
-      - name: Validate Terraform
-        run: cd terraform && terraform validate
-      
-      - name: Plan Terraform
-        run: cd terraform && terraform plan -out=tfplan
+        run: terraform init
 
-      - name: Apply Terraform
-        run: cd terraform && terraform apply -auto-approve tfplan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.clientId }}
-          ARM_CLIENT_SECRET: ${{ secrets.clientSecret }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.subscriptionId }}
-          ARM_TENANT_ID: ${{ secrets.tenantId }}
+      - name: Validate Terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+  deploy-app:
+    name: "Deploy App to AKS"
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS_TEMP }}
+
+      - name: Get AKS Credentials
+        run: az aks get-credentials --resource-group 14185-irmai-1-jg5p49 --name irmai-1-jg5p49 --overwrite-existing
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f k8s/deployment.yml
+          kubectl apply -f k8s/service.yml
