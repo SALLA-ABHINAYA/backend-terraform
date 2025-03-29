@@ -1,34 +1,25 @@
-terraform {
-  backend "azurerm" {
-    resource_group_name   = "14185-irmai-1-jg5p49"  # Your existing resource group
-    storage_account_name  = "irmaitfstorage"       # Your storage account name
-    container_name        = "terraform-state"      # Your container  name
-    key                   = "infra.tfstate"
-  }
-}
-
 provider "azurerm" {
   features {}
-  subscription_id = "36448a90-905c-4f48-b1b3-deb171f7c247" #  Ensure this  subscription ID is correct
 }
 
-# Use an existing Resource Group
-data "azurerm_resource_group" "irmai_rg" {
-  name = "14185-irmai-1-jg5p49" # Ensure this   name matches the existing resource group
+# Resource Group
+resource "azurerm_resource_group" "irmai_rg" {
+  name     = "14185-irmai-1-jg5p49"
+  location = "Canada Central"
 }
 
 # Virtual Network
 resource "azurerm_virtual_network" "irmai_vnet" {
   name                = "irmai-1-jg5p49-vn"
   address_space       = ["10.0.0.0/16"]
-  location            = data.azurerm_resource_group.irmai_rg.location
-  resource_group_name = data.azurerm_resource_group.irmai_rg.name
+  location            = azurerm_resource_group.irmai_rg.location
+  resource_group_name = azurerm_resource_group.irmai_rg.name
 }
 
 # Subnet
 resource "azurerm_subnet" "irmai_subnet" {
   name                 = "irmai-1-jg5p49-sn"
-  resource_group_name  = data.azurerm_resource_group.irmai_rg.name
+  resource_group_name  = azurerm_resource_group.irmai_rg.name
   virtual_network_name = azurerm_virtual_network.irmai_vnet.name
   address_prefixes     = ["10.0.0.0/24"]
 }
@@ -36,8 +27,8 @@ resource "azurerm_subnet" "irmai_subnet" {
 # Network Security Group (NSG) - Best practice default deny inbound
 resource "azurerm_network_security_group" "irmai_nsg" {
   name                = "irmai-default-nsg"
-  location            = data.azurerm_resource_group.irmai_rg.location
-  resource_group_name = data.azurerm_resource_group.irmai_rg.name
+  location            = azurerm_resource_group.irmai_rg.location
+  resource_group_name = azurerm_resource_group.irmai_rg.name
 
   security_rule {
     name                       = "Allow-HTTPS-Out"
@@ -73,8 +64,8 @@ resource "azurerm_subnet_network_security_group_association" "irmai_subnet_nsg_a
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "irmai_aks" {
   name                = "irmai-1-jg5p49"
-  location            = data.azurerm_resource_group.irmai_rg.location
-  resource_group_name = data.azurerm_resource_group.irmai_rg.name
+  location            = azurerm_resource_group.irmai_rg.location
+  resource_group_name = azurerm_resource_group.irmai_rg.name
   dns_prefix          = "irmai"
 
   default_node_pool {
@@ -92,6 +83,7 @@ resource "azurerm_kubernetes_cluster" "irmai_aks" {
     load_balancer_sku  = "standard"
     dns_service_ip     = "10.0.0.10"
     service_cidr       = "10.0.0.0/16"
+    docker_bridge_cidr = "172.17.0.1/16"
   }
 }
 
@@ -132,15 +124,16 @@ resource "azurerm_kubernetes_cluster_node_pool" "sysff" {
   mode                  = "User"
 }
 
-# Check if the private DNS zone already exists
-data "azurerm_private_dns_zone" "existing_blob_dns" {
-  name                = "privatelink.blob.core.windows.net"
-  resource_group_name = data.azurerm_resource_group.irmai_rg.name
-}
-
-# Create the private DNS zone if it doesn't exist
+# Optional: Private DNS Zone (Placeholder if you want to manage via TF)
 resource "azurerm_private_dns_zone" "blob_dns" {
-  count               = data.azurerm_private_dns_zone.existing_blob_dns.id != "" ? 0 : 1
   name                = "privatelink.blob.core.windows.net"
-  resource_group_name = data.azurerm_resource_group.irmai_rg.name
+  resource_group_name = azurerm_resource_group.irmai_rg.name
+}
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "14185-irmai-1-jg5p49"
+    storage_account_name = "irmaitfstorage"  # Updated Storage Account Name
+    container_name       = "terraform-state" # Updated Container Name
+    key                  = "terraform-state.tfstate"
+  }
 }
